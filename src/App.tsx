@@ -18,7 +18,7 @@ function App() {
       </div>
 
       <footer className="py-12 text-center text-stone-400 text-sm bg-white relative z-20">
-        <p className="opacity-60">&copy; 2026 Şeyda & Oğuzhan</p>
+        <p className="opacity-60">&copy; ∞ Şeyda & Oğuzhan</p>
       </footer>
     </div>
   );

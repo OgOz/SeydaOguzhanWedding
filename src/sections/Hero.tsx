@@ -53,7 +53,7 @@ export const Hero: React.FC = () => {
     }
 
     return (
-        <div ref={containerRef} className="relative min-h-[100dvh] flex flex-col items-center justify-center bg-[#fbf8f2] overflow-hidden pt-20 pb-10">
+        <div ref={containerRef} className="relative min-h-[100svh] flex flex-col items-center justify-between bg-[#fdf6f8] overflow-hidden pt-20 pb-12">
 
             {/* Subtle Grain/Texture Overlay */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
@@ -62,7 +62,7 @@ export const Hero: React.FC = () => {
             <div className="absolute top-[-20%] left-[-10%] w-[50vh] h-[50vh] bg-gold-200 rounded-full blur-[100px] opacity-30 animate-pulse"></div>
             <div className="absolute bottom-[-20%] right-[-10%] w-[60vh] h-[60vh] bg-gold-300 rounded-full blur-[120px] opacity-20"></div>
 
-            <div ref={textRef} className="relative z-10 flex flex-col items-center text-center px-4 space-y-12">
+            <div ref={textRef} className="relative z-10 flex flex-col items-center text-center px-4 space-y-12 flex-1 justify-center">
 
                 <div className="hero-subtitle flex items-center gap-4 text-gold-600 uppercase tracking-[0.4em] text-xs md:text-sm font-medium">
                     <span className="w-12 h-[1px] bg-gold-400"></span>
@@ -91,7 +91,7 @@ export const Hero: React.FC = () => {
 
             </div>
 
-            <div className="scroll-indicator absolute bottom-20 left-1/2 -translate-x-1/2 z-20">
+            <div className="scroll-indicator relative z-20 mt-8">
                 <HoldButton
                     onComplete={() => {
                         document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' });
