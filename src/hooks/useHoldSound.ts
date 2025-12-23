@@ -32,12 +32,12 @@ export const useHoldSound = () => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
-        osc.type = 'triangle'; // Softer than square, richer than sine
+        osc.type = 'sine'; // Pure sine for a soft "hum"
         osc.frequency.setValueAtTime(200, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 1.5); // Rise pitch
+        osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 1.5); // Gentler rise
 
         gain.gain.setValueAtTime(0, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.5); // Fade in
+        gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.5); // Lower volume (0.3 -> 0.15)
 
         osc.connect(gain);
         gain.connect(ctx.destination);
