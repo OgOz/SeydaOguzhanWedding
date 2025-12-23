@@ -1,26 +1,44 @@
-import { Hero } from './sections/Hero';
-import { Details } from './sections/Details';
-import { Donation } from './sections/Donation';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+import { useEffect } from 'react';
+import { Hero } from './components/Hero';
+import { Details } from './components/Details';
+import { Gift } from './components/Gift';
+import { FAQ } from './components/FAQ';
+import { Footer } from './components/Footer';
+import Lenis from '@studio-freight/lenis';
 
 function App() {
-  return (
-    <div className="min-h-screen w-full bg-[#fbf8f2] font-sans antialiased text-dark-900 selection:bg-gold-200 selection:text-dark-900">
-      <Hero />
-      {/* Container adds negative margin to pull overlapping content */}
-      <div className="relative z-20">
-        <Details />
-        <Donation />
-      </div>
 
-      <footer className="py-12 text-center text-stone-400 text-sm bg-white relative z-20">
-        <p className="opacity-60">&copy; ∞ Şeyda & Oğuzhan</p>
-      </footer>
-    </div>
+  // Smooth Scroll Setup
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      touchMultiplier: 2,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
+  return (
+    <main className="w-full bg-bg-primary min-h-screen">
+      <Hero />
+      <Details />
+      <Gift />
+      <FAQ />
+      <Footer />
+    </main>
   );
 }
 

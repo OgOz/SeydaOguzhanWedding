@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, useAnimation, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useHoldSound } from '../hooks/useHoldSound';
 
 interface HoldButtonProps {
     onComplete: () => void;
@@ -8,6 +9,9 @@ interface HoldButtonProps {
 
 export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className }) => {
     const [isExploding, setIsExploding] = useState(false);
+
+    // Sound Hook
+    const { playCharge, playSuccess, stop } = useHoldSound();
 
     // We use a MotionValue to drive the gradient fill level (0 to 100)
     const fillLevel = useMotionValue(0);
@@ -18,6 +22,9 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
 
     const handleStart = async () => {
         if (isExploding) return;
+
+        // Start Sound
+        playCharge();
 
         // Stop idle pulsing
         scaleControls.stop();
@@ -38,12 +45,16 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
         if (fillLevel.get() > 99) {
             triggerExplosion();
         } else {
-            // If aborted early? (Should be handled by handleCancel)
+            // Cancelled before completion
+            stop();
         }
     };
 
     const handleCancel = () => {
         if (isExploding) return;
+
+        // Stop Sound
+        stop();
 
         // Reset fill
         animate(fillLevel, 0, { duration: 0.2 });
@@ -58,6 +69,9 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
 
     const triggerExplosion = async () => {
         setIsExploding(true);
+
+        // Success Sound
+        playSuccess();
 
         // Instant hide heart
         scaleControls.start({ scale: 0, opacity: 0, transition: { duration: 0.1 } });
@@ -101,7 +115,7 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
             <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={overlayControls}
-                className="fixed z-[9999] pointer-events-none bg-gold-400 w-20 h-20 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center"
+                className="fixed z-[9999] pointer-events-none bg-rose-400 w-20 h-20 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center"
             />
 
             <div className={`flex flex-col items-center gap-4 ${className}`}>
@@ -145,7 +159,7 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
                 </motion.button>
 
                 <div className="relative z-10 text-center pointer-events-none">
-                    <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-gold-600/80">
+                    <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-rose-500/80">
                         Basılı Tut
                     </span>
                 </div>

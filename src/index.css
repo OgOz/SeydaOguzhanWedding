@@ -1,27 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-  /* Rose Pink Theme */
-  --color-gold-50: #fdf6f8;
-  --color-gold-100: #fbebf1;
-  --color-gold-200: #f5d6e2;
-  --color-gold-300: #eeb0ca;
-  --color-gold-400: #ca869d;
-  /* Base */
-  --color-gold-500: #b56c86;
-  --color-gold-600: #9e536d;
-  --color-gold-700: #853f57;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", "Times New Roman", serif;
 
-  --color-dark-900: #1a1a1a;
-  --color-dark-800: #2d2d2d;
+  --color-bg-primary: #FFFAFB;
+  --color-bg-secondary: #FDF2F5;
 
-  --font-serif: "Playfair Display", serif;
-  --font-sans: "Inter", sans-serif;
+  --color-text-primary: #2D2426;
+  --color-text-secondary: #6B5D61;
+
+  /* Rose Palette Re-definition for Utilities */
+  --color-rose-50: #FCF5F7;
+  --color-rose-100: #F8E8EC;
+  --color-rose-200: #F2D2DC;
+  --color-rose-300: #E6B6C6;
+  --color-rose-400: #D896AB;
+  --color-rose-500: #CA869D;
+  --color-rose-600: #AB657E;
+  --color-rose-700: #8D4D63;
+  --color-rose-800: #733E50;
+  --color-rose-900: #623645;
+  --color-rose-950: #391B26;
+}
+
+/* Standard CSS Variables for runtime usage if needed */
+:root {
+  --bg-primary: var(--color-bg-primary);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
 }
 
 @layer base {
   body {
-    @apply bg-stone-50 text-dark-800 font-sans antialiased;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 
   h1,
@@ -30,6 +45,26 @@
   h4,
   h5,
   h6 {
-    @apply font-serif;
+    font-family: var(--font-serif);
   }
+
+  ::selection {
+    background-color: var(--color-rose-200);
+    color: var(--color-rose-900);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
