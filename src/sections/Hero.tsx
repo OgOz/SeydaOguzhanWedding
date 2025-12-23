@@ -66,7 +66,7 @@ export const Hero: React.FC = () => {
 
                 <div className="hero-subtitle flex items-center gap-4 text-gold-600 uppercase tracking-[0.4em] text-xs md:text-sm font-medium">
                     <span className="w-12 h-[1px] bg-gold-400"></span>
-                    Düğün Davetiyesi
+                    Birlikte, nihayet...
                     <span className="w-12 h-[1px] bg-gold-400"></span>
                 </div>
 
@@ -80,10 +80,11 @@ export const Hero: React.FC = () => {
                     </h1>
                 </div>
 
-                <div className="hero-subtitle flex flex-col items-center gap-2 text-dark-800 font-light mt-8">
-                    <p className="text-2xl md:text-3xl font-serif italic">
-                        7 Şubat 2026
+                <div className="hero-subtitle flex flex-col items-center gap-4 text-dark-800 font-light mt-8 max-w-md mx-auto">
+                    <p className="text-lg md:text-xl font-serif italic leading-relaxed text-stone-600">
+                        "Bu hikâye yıllardır 'biz'di.<br />Bugün adını koyuyoruz."
                     </p>
+                    <div className="w-1.5 h-1.5 rounded-full bg-gold-400 mt-4"></div>
                     <p className="text-sm md:text-base text-stone-500 uppercase tracking-widest mt-2">
                         Bakırköy, İstanbul
                     </p>

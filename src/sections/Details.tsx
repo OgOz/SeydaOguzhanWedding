@@ -38,6 +38,12 @@ export const Details: React.FC = () => {
         <Section id="details" className="relative z-20 bg-white rounded-t-[3rem] -mt-10 pt-24 pb-32 shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
             <div ref={containerRef} className="max-w-5xl mx-auto">
 
+                <div className="text-center mb-16 max-w-2xl mx-auto space-y-4">
+                    <p className="text-2xl md:text-3xl font-serif italic text-gold-600 leading-relaxed">
+                        "Gelin, birlikte kutlayalım,<br />kahkaha serbest, duygulanmak normal."
+                    </p>
+                </div>
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12 md:gap-8">
 
                     {/* Date */}
@@ -62,7 +68,7 @@ export const Details: React.FC = () => {
                             </span>
                             <span className="text-sm font-semibold text-gold-600 uppercase tracking-wider">Saat</span>
                         </div>
-                        <h3 className="text-4xl font-serif text-dark-900 mb-2">14:00</h3>
+                        <h3 className="text-4xl font-serif text-dark-900 mb-2">16:30</h3>
                         <p className="text-stone-500">Nikah töreni başlangıcı.</p>
                     </div>
 
