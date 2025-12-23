@@ -1,8 +1,7 @@
 import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { MagneticButton } from '../components/MagneticButton';
-import { ArrowDown } from 'lucide-react';
+import { HoldButton } from '../components/HoldButton';
 
 export const Hero: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -92,17 +91,14 @@ export const Hero: React.FC = () => {
 
             </div>
 
-            <div className="scroll-indicator absolute bottom-10 left-1/2 -translate-x-1/2 z-20">
-                <MagneticButton
-                    onClick={() => document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="bg-white/50 backdrop-blur-sm border border-gold-200/50 hover:bg-white text-gold-700"
-                >
-                    <div className="flex flex-col items-center gap-2">
-                        <span className="text-[10px] uppercase tracking-widest">Detaylar</span>
-                        <ArrowDown size={16} className="animate-bounce" />
-                    </div>
-                </MagneticButton>
+            <div className="scroll-indicator absolute bottom-20 left-1/2 -translate-x-1/2 z-20">
+                <HoldButton
+                    onComplete={() => {
+                        document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                />
             </div>
-        </div >
+
+        </div>
     );
 };
