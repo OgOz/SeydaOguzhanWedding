@@ -21,7 +21,7 @@ export const Donation: React.FC = () => {
         <Section id="gift" className="relative z-20 pb-32">
             <div ref={containerRef}>
                 <div className="donation-title text-center mb-12">
-                    <span className="text-gold-600 uppercase tracking-widest text-sm font-semibold mb-4 block">Hediye</span>
+                    <span className="text-rose-500 uppercase tracking-widest text-sm font-semibold mb-4 block">Hediye</span>
                     <h2 className="text-5xl md:text-6xl font-serif text-dark-900 mb-6">Düğün Hediyesi</h2>
                     <p className="text-lg text-stone-600 max-w-xl mx-auto font-light leading-relaxed italic">
                         "Dilerseniz çam sakızı çoban armağanı..."
