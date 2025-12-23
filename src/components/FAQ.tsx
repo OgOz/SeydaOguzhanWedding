@@ -78,7 +78,7 @@ export const FAQ: React.FC = () => {
                     {content.faq.map((item, idx) => (
                         <div
                             key={idx}
-                            ref={el => itemsRef.current[idx] = el}
+                            ref={(el) => { if (el) itemsRef.current[idx] = el; }}
                             onMouseEnter={() => handleMouseEnter(idx)}
                             className="group cursor-default transition-colors w-full"
                         >

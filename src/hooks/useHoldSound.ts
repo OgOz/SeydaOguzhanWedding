@@ -56,7 +56,7 @@ export const useHoldSound = () => {
         // Create a nice major chord or happy 'ding'
         const freqs = [523.25, 659.25, 783.99]; // C major chord
 
-        freqs.forEach((f, i) => {
+        freqs.forEach((f) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
 
