@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, useMotionValue, useTransform, animate } from 'framer-motion';
 
 interface HoldButtonProps {
     onComplete: () => void;
@@ -8,7 +8,9 @@ interface HoldButtonProps {
 
 export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className }) => {
     const [isExploding, setIsExploding] = useState(false);
-    const fillControls = useAnimation();
+
+    // We use a MotionValue to drive the gradient fill level (0 to 100)
+    const fillLevel = useMotionValue(0);
     const scaleControls = useAnimation();
     const overlayControls = useAnimation();
 
@@ -17,38 +19,39 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
     const handleStart = async () => {
         if (isExploding) return;
 
-        // Stop idle growing/pulsing
+        // Stop idle pulsing
         scaleControls.stop();
 
-        // Start filling AND growing simultaneously
-        // 1. Fill: Moves transition from y=24 to y=0 (Liquid effect)
-        fillControls.start({
-            y: 0,
-            transition: { duration: HOLD_DURATION, ease: "linear" }
+        // 1. Animate Fill Level from 0% to 100%
+        animate(fillLevel, 100, {
+            duration: HOLD_DURATION,
+            ease: "linear"
         });
 
-        // 2. Grow: Scale up MASSIVELY while filling
-        // User wants noticeable growth. 4x is significant.
+        // 2. Grow Scale Massively
         await scaleControls.start({
             scale: 4,
             transition: { duration: HOLD_DURATION, ease: "easeInOut" }
         });
 
-        // If we reach here without cancellation, we are done!
-        triggerExplosion();
+        // If we reach here (and fill is > 99?), trigger success
+        if (fillLevel.get() > 99) {
+            triggerExplosion();
+        } else {
+            // If aborted early? (Should be handled by handleCancel)
+        }
     };
 
     const handleCancel = () => {
         if (isExploding) return;
 
         // Reset fill
-        fillControls.stop();
-        fillControls.start({ y: 24, transition: { duration: 0.2 } });
+        animate(fillLevel, 0, { duration: 0.2 });
 
-        // Reset scale to idle pulse
+        // Reset scale
         scaleControls.stop();
         scaleControls.start({
-            scale: [1, 1.1, 1], // Idle pulse
+            scale: [1, 1.1, 1],
             transition: { repeat: Infinity, duration: 2, ease: "easeInOut" }
         });
     };
@@ -56,35 +59,32 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
     const triggerExplosion = async () => {
         setIsExploding(true);
 
-        // 1. Hide the button content instantly
+        // Instant hide heart
         scaleControls.start({ scale: 0, opacity: 0, transition: { duration: 0.1 } });
 
-        // 2. Expand overlay to fill screen
+        // Expand overlay
         await overlayControls.start({
             scale: 60,
             opacity: 1,
             transition: { duration: 0.8, ease: "easeIn" }
         });
 
-        // 3. Complete callback (scroll)
         onComplete();
 
-        // 4. Fade out overlay
+        // Fade out overlay
         await overlayControls.start({ opacity: 0, transition: { duration: 0.5, delay: 0.5 } });
         setIsExploding(false);
 
-        // Reset button state
-        fillControls.set({ y: 24 });
+        // Reset
+        fillLevel.set(0);
         scaleControls.set({ scale: 1, opacity: 1 });
-
-        // Restart idle animation
         scaleControls.start({
             scale: [1, 1.1, 1],
             transition: { repeat: Infinity, duration: 2, ease: "easeInOut" }
         });
     };
 
-    // Initial Pulse Animation
+    // Initial Pulse
     React.useEffect(() => {
         scaleControls.start({
             scale: [1, 1.1, 1],
@@ -92,9 +92,12 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
         });
     }, []);
 
+    // Transform motion value to percentage strings for the gradient stops
+    const offset1 = useTransform(fillLevel, v => `${v}%`);
+    // const offset2 = useTransform(fillLevel, v => `${v}%`); // Sharp line
+
     return (
         <>
-            {/* Full Screen Overlay for Explosion */}
             <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={overlayControls}
@@ -109,43 +112,38 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
                     onPointerLeave={handleCancel}
                     animate={scaleControls}
                 >
-                    {/* 
-               SVG with Masking for Perfect Fill 
-            */}
                     <svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-xl overflow-visible">
                         <defs>
-                            {/* Heart Path */}
                             <path id="heartPath" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
 
-                            {/* Clip Path Definition */}
-                            <clipPath id="heartClip">
-                                <use href="#heartPath" />
-                            </clipPath>
+                            {/* Linear Gradient for Liquid Fill 
+                       x1,y1 to x2,y2 determines direction. 
+                       x1=0, x2=0 is vertical.
+                       y1=1 (bottom), y2=0 (top).
+                       
+                       Stops:
+                       stop1: pink (offset starts at 0%)
+                       stop2: white (offset starts at 0%)
+                       
+                       As offset increases to 100%:
+                       The 'pink' region grows from bottom to top.
+                   */}
+                            <linearGradient id="liquidGradient" x1="0" x2="0" y1="1" y2="0">
+                                <motion.stop stopColor="#ca869d" offset={offset1} />
+                                <motion.stop stopColor="#ffffff" offset={offset1} />
+                            </linearGradient>
                         </defs>
 
-                        {/* 1. Base Heart (Empty Container) 
-                    - Fill: White
-                    - Stroke: Gold (to show the "container" bounds clearly)
-                */}
-                        <use href="#heartPath" className="fill-white stroke-gold-300 stroke-[0.5]" />
-
-                        {/* 2. Gold Liquid Fill (Clipped by Heart) */}
-                        <g clipPath="url(#heartClip)">
-                            {/* The liquid is a gold rect that moves up */}
-                            <motion.rect
-                                x="0"
-                                y="24"  // Start below visible area
-                                width="24"
-                                height="24"
-                                className="fill-gold-500" // Slightly darker gold for liquid
-                                initial={{ y: 24 }}
-                                animate={fillControls}
-                            />
-                        </g>
+                        {/* The Heart using the Gradient Fill */}
+                        <use
+                            href="#heartPath"
+                            fill="url(#liquidGradient)"
+                            stroke="#ca869d"
+                            strokeWidth="0.5"
+                        />
                     </svg>
                 </motion.button>
 
-                {/* Label Moved Below */}
                 <div className="relative z-10 text-center pointer-events-none">
                     <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-gold-600/80">
                         Basılı Tut
