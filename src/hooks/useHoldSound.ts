@@ -21,37 +21,13 @@ export const useHoldSound = () => {
         }
     };
 
-    const playCharge = () => {
-        initAudio();
-        const ctx = audioContextRef.current!;
-        if (ctx.state === 'suspended') ctx.resume();
-
-        // Stop existing if any
-        stop();
-
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = 'sine'; // Pure sine for a soft "hum"
-        osc.frequency.setValueAtTime(200, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 1.5); // Gentler rise
-
-        gain.gain.setValueAtTime(0, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.5); // Lower volume (0.3 -> 0.15)
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start();
-
-        oscillatorRef.current = osc;
-        gainNodeRef.current = gain;
-    };
+    // Charge sound removed as requested
+    const playCharge = () => { };
 
     const playSuccess = () => {
         initAudio();
         const ctx = audioContextRef.current!;
-        stop(); // Stop charge sound
+        try { stop(); } catch (e) { }
 
         // Create a nice major chord or happy 'ding'
         const freqs = [523.25, 659.25, 783.99]; // C major chord

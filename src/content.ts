@@ -14,7 +14,7 @@ export const content = {
             description: "Bu özel günümüzde yanımızda olmanız dileğiyle... Kahkaha serbest, duygulanmak normal.",
             location: "Tarık Akan Nikâh Salonu, Bakırköy, İstanbul",
             start: "20260207T163000",
-            end: "20260207T183000", // Assuming 2 hours
+            end: "20260207T173000", // 1 hour duration
         }
     },
     location: {
@@ -26,7 +26,7 @@ export const content = {
         embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.696342898956!2d28.8698!3d40.9899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14c32f6b3b3b3b3b%3A0x3b3b3b3b3b3b3b3b!2sTar%C4%B1k%20Akan%20Nikah%20Salonu!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str", // Placeholder - user should verify or I can try to find better
     },
     hero: {
-        eyebrow: "DÜĞÜN DAVETİYESİ",
+        eyebrow: "NİKAH DAVETİYESİ",
         sub: "7 Şubat 2026 · Bakırköy, İstanbul",
         signature: "Kahkaha serbest. Duygulanmak normal.",
         cta: {

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { content } from '../content';
 import { HoldButton } from './HoldButton';
+import { generateICS } from '../utils/ics';
 
 export const Hero: React.FC = () => {
     const scrollToDetails = () => {
@@ -9,10 +10,7 @@ export const Hero: React.FC = () => {
     };
 
     const openCalendar = () => {
-        // Generate simple Google Calendar link for now
-        const { start, end, title, description, location } = content.date.calendar;
-        const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${start}/${end}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}&sf=true&output=xml`;
-        window.open(url, '_blank');
+        generateICS(content.date.calendar);
     };
 
     return (

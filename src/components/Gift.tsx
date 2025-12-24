@@ -1,115 +1,110 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import { content } from '../content';
 
 export const Gift: React.FC = () => {
-    const [amount, setAmount] = useState<string>('');
-    const [loading, setLoading] = useState(false);
+    const [clickCount, setClickCount] = useState(0);
+    const controls = useAnimation();
 
-    const handleChipClick = (val: number) => {
-        setAmount(val.toString());
-    };
+    // Playful messages for evasion
+    const messages = [
+        "Aslında sevginiz yeterli",
+        "Zahmet etmeyin :)",
+        "En büyük hediye sizsiniz",
+        "Şaka şaka, buyrun",
+        "Tamam tamam, pes ettim! 😄"
+    ];
 
-    const handlePayment = async () => {
-        if (!amount || Number(amount) < 10) return;
+    const [message, setMessage] = useState(messages[0]);
+    const [isCaught, setIsCaught] = useState(false);
 
-        setLoading(true);
+    const handleInteraction = async () => {
+        if (isCaught) {
+            // Open Shopier or Payment Modal
+            // For now, let's reset to show the behavior again or actually open a link
+            // Since we don't have the real link yet, let's just show an alert or console log
+            // Or actually, let's make it open the modal if we had one. 
+            // Per instructions, "sadece interaktif bir buton olsun", implies maybe no modal yet?
+            // But eventually they need to give a gift.
+            // Let's reveal the real "Pay" button or form below it? 
+            // Or just make THIS button the pay button now.
+            return;
+        }
 
-        try {
-            // In Phase 3, this will call /api/create-payment
-            // For now, we mock the behavior or just alert
-            /* 
-            const res = await fetch('/api/create-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ amount, currency: 'TRY' })
+        const nextCount = clickCount + 1;
+        setClickCount(nextCount);
+
+        if (nextCount < 4) {
+            // Evasion Logic
+            setMessage(messages[nextCount % messages.length]);
+
+            // Random move check for desktop hover or mobile tap attempt
+            // We'll translate it to a random nearby position
+            const x = (Math.random() - 0.5) * 200; // -100 to 100
+            const y = (Math.random() - 0.5) * 100; // -50 to 50
+
+            await controls.start({
+                x,
+                y,
+                transition: { duration: 0.2, type: "spring", stiffness: 300 }
             });
-            const data = await res.json();
-            if (data.html) { ... }
-            */
-
-            console.log('Processing payment for:', amount);
-            alert('Shopier entegrasyonu Phase 3\'te eklenecek.');
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
+        } else {
+            // Caught Logic
+            setIsCaught(true);
+            setMessage(messages[4]); // "Tamam pes ettim"
+            controls.start({ x: 0, y: 0 }); // Return to center
         }
     };
 
     return (
-        <section id="gift" className="relative py-24 px-6 bg-gradient-to-b from-white to-rose-50/30">
-            <div className="max-w-xl mx-auto text-center space-y-12">
+        <section id="gift" className="py-24 px-6 bg-rose-50 overflow-hidden relative">
+            <div className="max-w-md mx-auto text-center space-y-12">
 
-                {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="space-y-4"
-                >
-                    <span className="text-rose-500 text-xs tracking-[0.2em] uppercase font-semibold">
+                <div className="space-y-4">
+                    <h2 className="text-sm md:text-base text-rose-500 font-bold tracking-[0.2em] uppercase">
                         {content.gift.title}
-                    </span>
-                    <p className="text-2xl md:text-3xl font-serif text-text-primary leading-snug">
-                        "{content.gift.sub}"
+                    </h2>
+                    <p className="text-xl md:text-2xl font-serif text-text-secondary italic">
+                        {isCaught ? "Desteğiniz için teşekkürler." : "Ufak bir katkı?"}
                     </p>
-                </motion.div>
+                </div>
 
-                {/* Gift Card */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="bg-white rounded-[2rem] p-8 md:p-12 shadow-2xl shadow-rose-200/20 border border-rose-100"
-                >
-                    {/* Chip Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-                        {content.gift.chips.map((chip) => (
-                            <button
-                                key={chip}
-                                onClick={() => handleChipClick(chip)}
-                                className={`py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${amount === chip.toString()
-                                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-                                    : 'bg-rose-50 text-rose-900/60 hover:bg-rose-100'
-                                    }`}
-                            >
-                                {chip} ₺
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Custom Input */}
-                    <div className="relative mb-8 group">
-                        <label className="block text-xs font-semibold text-rose-300 uppercase tracking-wider mb-2 text-left px-1">
-                            {content.gift.customLabel}
-                        </label>
-                        <div className="relative flex items-center">
-                            <span className="absolute left-4 text-2xl text-rose-300 font-light">₺</span>
-                            <input
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                placeholder="0"
-                                className="w-full bg-rose-50/30 text-4xl font-serif text-rose-950 pl-10 pr-4 py-4 rounded-2xl border-2 border-transparent focus:border-rose-200 focus:bg-white transition-all outline-none placeholder:text-rose-200"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        onClick={handlePayment}
-                        disabled={!amount || loading}
-                        className="w-full py-4 bg-rose-950 text-white rounded-xl font-medium text-lg shadow-xl shadow-rose-950/10 hover:bg-rose-900 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                <div className="h-40 flex items-center justify-center relative">
+                    {/* The Playful Button */}
+                    <motion.button
+                        animate={controls}
+                        onHoverStart={() => !isCaught && handleInteraction()} // Desktop evade
+                        onTap={() => isCaught ? null : handleInteraction()} // Mobile fallback
+                        onClick={() => isCaught ? window.location.href = '#' : null} // Final action
+                        className={`
+                            px-8 py-4 rounded-full text-lg font-medium transition-all duration-300 shadow-xl
+                            ${isCaught
+                                ? 'bg-rose-500 text-white cursor-pointer hover:bg-rose-600'
+                                : 'bg-white text-rose-500 cursor-default hover:shadow-2xl'
+                            }
+                        `}
                     >
-                        {loading ? 'İşleniyor...' : content.gift.button}
-                    </button>
+                        {isCaught ? content.gift.button : message}
+                    </motion.button>
+                </div>
 
-                    <p className="mt-6 text-xs text-text-secondary/60 flex items-center justify-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-400"></span>
-                        {content.gift.note}
-                    </p>
-                </motion.div>
+                {isCaught && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-6 bg-white/50 backdrop-blur rounded-2xl border border-rose-100"
+                    >
+                        <p className="text-text-secondary mb-4">
+                            Şaka bir yana, yanımızda olmanız en büyük hediye.
+                            <br />
+                            İlla katkıda bulunmak isterseniz:
+                        </p>
+                        {/* Here we could re-integrate the chips if desired, or just the main button action */}
+                        <button className="w-full py-3 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-colors">
+                            {content.gift.button}
+                        </button>
+                    </motion.div>
+                )}
 
             </div>
         </section>

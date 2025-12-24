@@ -11,7 +11,7 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
     const [isExploding, setIsExploding] = useState(false);
 
     // Sound Hook
-    const { playCharge, playSuccess, stop } = useHoldSound();
+    const { playSuccess, stop } = useHoldSound();
 
     // We use a MotionValue to drive the gradient fill level (0 to 100)
     const fillLevel = useMotionValue(0);
@@ -23,8 +23,8 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
     const handleStart = async () => {
         if (isExploding) return;
 
-        // Start Sound
-        playCharge();
+        // Charge sound removed
+        // playCharge();
 
         // Stop idle pulsing
         scaleControls.stop();

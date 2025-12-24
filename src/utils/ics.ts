@@ -25,7 +25,7 @@ END:VCALENDAR`;
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'nebahat-oguzhan-dugun.ics');
+    link.setAttribute('download', 'seyda-oguzhan-nikah.ics');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
