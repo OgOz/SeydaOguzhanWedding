@@ -12,6 +12,15 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
 
     const text = "Birlikte, nihayet...";
 
+    // Disable scroll while preloader is active
+    React.useLayoutEffect(() => {
+        const originalStyle = window.getComputedStyle(document.body).overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = originalStyle;
+        };
+    }, []);
+
     useGSAP(() => {
         const chars = textRef.current?.querySelectorAll('.char');
         if (!chars) return;
