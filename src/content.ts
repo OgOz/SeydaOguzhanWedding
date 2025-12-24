@@ -65,8 +65,8 @@ export const content = {
         copyright: "© ∞ Şeyda & Oğuzhan"
     },
     meta: {
-        title: "Şeyda & Oğuzhan Wedding",
-        description: "Şeyda & Oğuzhan'ın düğün davetiyesi. 7 Şubat 2026, Tarık Akan Nikâh Salonu.",
+        title: "Şeyda & Oğuzhan - Nikâh Davetiyesi",
+        description: "Bu hikâye yıllardır ‘biz’di, bugün resmileşiyor. Şeyda ve Oğuzhan'ın nikâh törenine davetlisiniz. 7 Şubat 2026, Tarık Akan Nikâh Salonu.",
         lang: "tr"
     }
 };
