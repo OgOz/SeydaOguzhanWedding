@@ -99,11 +99,10 @@ export const Hero: React.FC = () => {
             <div className="scroll-indicator relative z-20 mt-8 flex flex-col items-center gap-6">
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 text-rose-500 hover:text-rose-600 transition-colors text-sm uppercase tracking-widest font-medium group"
+                    className="flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm border border-rose-200 rounded-full text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all shadow-sm hover:shadow-md group"
                 >
-                    <span className="w-8 h-[1px] bg-rose-300 group-hover:w-12 transition-all"></span>
-                    Davetiyeyi Görüntüle
-                    <span className="w-8 h-[1px] bg-rose-300 group-hover:w-12 transition-all"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><path d="M3 9h18" /><path d="M9 21V9" /></svg>
+                    <span className="text-xs md:text-sm font-medium tracking-wide uppercase">Davetiyeyi Görüntüle</span>
                 </button>
 
                 <HoldButton
@@ -113,8 +112,8 @@ export const Hero: React.FC = () => {
                 />
             </div>
 
+            {/* Modal Portal should ideally be at root, but for now strict z-index */}
             <InvitationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-
         </div >
     );
 };

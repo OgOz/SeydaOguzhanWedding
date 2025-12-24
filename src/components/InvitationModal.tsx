@@ -39,12 +39,16 @@ export const InvitationModal: React.FC<InvitationModalProps> = ({ isOpen, onClos
                         </div>
 
                         {/* Image Container */}
-                        <div className="flex-1 overflow-y-auto p-4 bg-rose-50/30 flex items-center justify-center">
-                            <img
-                                src="/davetiye.jpg"
-                                alt="Şeyda & Oğuzhan Davetiye"
-                                className="w-full h-auto rounded-lg shadow-md border border-rose-100"
-                            />
+                        {/* Image Container */}
+                        <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-stone-100 flex items-center justify-center">
+                            <div className="relative bg-white p-3 shadow-xl rotate-1 hover:rotate-0 transition-all duration-500 ease-out">
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-32 h-8 bg-rose-500/10 backdrop-blur-sm -rotate-3 z-10 border border-white/20"></div>
+                                <img
+                                    src="/davetiye.jpg"
+                                    alt="Şeyda & Oğuzhan Davetiye"
+                                    className="w-full h-auto max-w-[85vw] md:max-w-sm block shadow-inner"
+                                />
+                            </div>
                         </div>
 
                         {/* Footer / Actions */}
