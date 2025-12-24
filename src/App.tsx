@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Hero } from './sections/Hero';
-import { Details } from './components/Details';
+import { Details } from './sections/Details';
+import { Guestbook } from './sections/Guestbook';
 import { Gift } from './components/Gift';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
@@ -44,6 +45,7 @@ function App() {
 
       <Hero />
       <Details />
+      <Guestbook />
       <FAQ />
       <Gift />
       <Footer />

@@ -35,7 +35,7 @@ export const Gift: React.FC = () => {
         "En büyük hediye sizsiniz ✨",
         "Gerçekten düşünmeniz yeter 🌸",
         "Güzel gönlünüz sağ olsun! 😇",
-        "Madem öyle, tamam pes ediyoruz! 🎁",
+        "Madem öyle, tamam 🎁",
         "Çok teşekkür ederiz 🫶🏻",
     ];
 
