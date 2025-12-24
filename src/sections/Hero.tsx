@@ -1,9 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { HoldButton } from '../components/HoldButton';
+import { InvitationModal } from '../components/InvitationModal';
 
 export const Hero: React.FC = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
 
@@ -92,7 +94,18 @@ export const Hero: React.FC = () => {
 
             </div>
 
-            <div className="scroll-indicator relative z-20 mt-8">
+
+
+            <div className="scroll-indicator relative z-20 mt-8 flex flex-col items-center gap-6">
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 text-rose-500 hover:text-rose-600 transition-colors text-sm uppercase tracking-widest font-medium group"
+                >
+                    <span className="w-8 h-[1px] bg-rose-300 group-hover:w-12 transition-all"></span>
+                    Davetiyeyi Görüntüle
+                    <span className="w-8 h-[1px] bg-rose-300 group-hover:w-12 transition-all"></span>
+                </button>
+
                 <HoldButton
                     onComplete={() => {
                         document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' });
@@ -100,6 +113,8 @@ export const Hero: React.FC = () => {
                 />
             </div>
 
-        </div>
+            <InvitationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+        </div >
     );
 };
