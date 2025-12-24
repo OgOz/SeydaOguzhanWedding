@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-serif: "Playfair Display", "Times New Roman", serif;
+  --font-script: "Great Vibes", cursive;
 
   --color-bg-primary: #FFFAFB;
   --color-bg-secondary: #FDF2F5;

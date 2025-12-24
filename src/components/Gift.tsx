@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
-import { content } from '../content';
+
 
 // Simple Toast Component
 const Toast: React.FC<{ message: string; isVisible: boolean }> = ({ message, isVisible }) => (
@@ -18,22 +18,25 @@ const Toast: React.FC<{ message: string; isVisible: boolean }> = ({ message, isV
     </AnimatePresence>
 );
 
+// ... imports
+
 export const Gift: React.FC = () => {
     const [clickCount, setClickCount] = useState(0);
     const controls = useAnimation();
     const [showToast, setShowToast] = useState(false);
 
-    // IBAN Constant
-    const IBAN = "TR49 0006 2000 7790 0006 6050 39";
+    // IBAN Constant - Should probably be dynamic or coming from config, but hardcoded here for now
+    const IBAN = "TR49 0006 2000 7790 0006 6050 39"; // This might need to be verified or updated by user later if it's a placeholder
 
-    // Playful messages for evasion
+    // Updated playful messages sequence
     const messages = [
         "Aslında sevginiz yeterli ❤️",
         "Zahmet etmeyin ✋",
         "En büyük hediye sizsiniz ✨",
         "Gerçekten düşünmeniz yeter 🌸",
-        "Madem öyle, buyrun 🎁",
-        "Tamam tamam, pes ettim! 😄"
+        "Güzel gönlünüz sağ olsun! 😇",
+        "Madem öyle, tamam pes ediyoruz! 🎁",
+        "Çok teşekkür ederiz 🫶🏻",
     ];
 
     const [message, setMessage] = useState(messages[0]);
@@ -57,13 +60,16 @@ export const Gift: React.FC = () => {
         const nextCount = clickCount + 1;
         setClickCount(nextCount);
 
-        if (nextCount < 5) { // Updated to < 5 because array length is now 6 (evasion steps 0-4)
+        // Logic adjustment: We want to show messages 0 to 5 as evasion steps.
+        // Message 6 ("Çok teşekkür ederiz") is the final "Caught" state message.
+        // So we evade as long as nextCount < messages.length - 1
+        if (nextCount < messages.length - 1) {
             // Evasion Logic
-            setMessage(messages[nextCount % messages.length]);
+            setMessage(messages[nextCount]);
 
-            // Random move check for desktop hover or mobile tap attempt
-            const x = (Math.random() - 0.5) * 200; // -100 to 100
-            const y = (Math.random() - 0.5) * 100; // -50 to 50
+            // Random move check
+            const x = (Math.random() - 0.5) * 200;
+            const y = (Math.random() - 0.5) * 100;
 
             await controls.start({
                 x,
@@ -71,9 +77,9 @@ export const Gift: React.FC = () => {
                 transition: { duration: 0.2, type: "spring", stiffness: 300 }
             });
         } else {
-            // Caught Logic
+            // Caught Logic (Final Step)
             setIsCaught(true);
-            setMessage(messages[5]); // Updated index for final message
+            setMessage(messages[messages.length - 1]); // Show the last message
             controls.start({ x: 0, y: 0 }); // Return to center
         }
     };
@@ -86,7 +92,7 @@ export const Gift: React.FC = () => {
 
                 <div className="space-y-4">
                     <h2 className="text-sm md:text-base text-rose-500 font-bold tracking-[0.2em] uppercase">
-                        {content.gift.title}
+                        HEDİYE
                     </h2>
                     <p className="text-xl md:text-2xl font-serif text-text-secondary italic">
                         {isCaught ? "Desteğiniz için teşekkürler." : "Ufak bir katkı?"}
@@ -101,14 +107,14 @@ export const Gift: React.FC = () => {
                         onTap={() => isCaught ? null : handleInteraction()} // Mobile fallback
                         onClick={() => isCaught ? null : null} // Handled by onTap/Hover for games
                         className={`
-                            px-8 py-4 rounded-full text-lg font-medium transition-all duration-300 shadow-xl
+                            px-8 py-4 rounded-full text-lg font-medium transition-all duration-300 shadow-xl select-none
                             ${isCaught
                                 ? 'bg-rose-500 text-white cursor-default'
-                                : 'bg-white text-rose-500 cursor-default hover:shadow-2xl'
+                                : 'bg-white text-rose-500 cursor-pointer hover:shadow-2xl'
                             }
                         `}
                     >
-                        {isCaught ? content.gift.button : message}
+                        {message}
                     </motion.button>
                 </div>
 
@@ -116,24 +122,27 @@ export const Gift: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="p-6 bg-white/50 backdrop-blur rounded-2xl border border-rose-100 space-y-4"
+                        className="p-6 bg-white/60 backdrop-blur rounded-2xl border border-rose-100 space-y-6"
                     >
-                        <p className="text-text-secondary">
-                            Şaka bir yana, yanımızda olmanız en büyük hediye.
-                            <br />
-                            İlla katkıda bulunmak isterseniz:
-                        </p>
+                        <div className="space-y-2">
+                            <p className="text-rose-900/80 font-medium">
+                                Şaka bir yana, yanımızda olmanız en büyük hediye.
+                            </p>
+                            <p className="text-sm text-stone-500">
+                                Yine de katkıda bulunmak isterseniz aşağıdan bilgilerimize ulaşabilirsiniz:
+                            </p>
+                        </div>
 
-                        <div className="bg-white p-4 rounded-xl border border-rose-200">
-                            <p className="text-xs text-rose-500 uppercase tracking-wider mb-1">IBAN</p>
-                            <p className="font-mono text-sm md:text-base text-text-primary break-all">
+                        <div className="bg-white p-5 rounded-xl border border-rose-200 shadow-sm">
+
+                            <p className="font-mono text-sm md:text-base text-stone-700 break-all">
                                 {IBAN}
                             </p>
                         </div>
 
                         <button
                             onClick={handleCopyIBAN}
-                            className="w-full py-3 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-3.5 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-all shadow-lg shadow-rose-200 flex items-center justify-center gap-2 active:scale-95"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
                             IBAN Kopyala
