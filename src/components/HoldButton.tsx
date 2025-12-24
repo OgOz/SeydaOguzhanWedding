@@ -160,7 +160,7 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
 
                 <div className="relative z-10 text-center pointer-events-none">
                     <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-rose-500/80">
-                        Basılı Tut
+                        Basılı Tutun
                     </span>
                 </div>
             </div>
