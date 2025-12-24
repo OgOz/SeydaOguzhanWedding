@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { content } from '../content';
 import { generateICS } from '../utils/ics';
 
+gsap.registerPlugin(ScrollTrigger);
+
 export const Details: React.FC = () => {
+    const storyRef = useRef<HTMLParagraphElement>(null);
+
     const openMap = () => window.open(content.location.mapLink, '_blank');
 
     const copyAddress = () => {
@@ -12,22 +19,58 @@ export const Details: React.FC = () => {
         alert("Adres kopyalandı!");
     };
 
+    useGSAP(() => {
+        if (!storyRef.current) return;
+
+        const chars = storyRef.current.querySelectorAll('.char');
+
+        gsap.fromTo(chars,
+            {
+                opacity: 0,
+                y: 20
+            },
+            {
+                opacity: 1,
+                y: 0,
+                stagger: 0.03, // Typed effect speed
+                duration: 0.8,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: storyRef.current,
+                    start: "top 80%",
+                    toggleActions: "play reverse play reverse"
+                }
+            }
+        );
+    }, { scope: storyRef });
+
+    // Split text helper
+    const splitText = (text: string) => {
+        return text.split("").map((char, index) => (
+            <span key={index} className="char inline-block min-w-[0.2em] whitespace-pre">
+                {char}
+            </span>
+        ));
+    };
+
     return (
         <section id="details" className="relative py-24 px-6 bg-white overflow-hidden">
             <div className="max-w-4xl mx-auto space-y-16">
 
                 {/* Story Blurb */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center space-y-6"
-                >
-                    <p className="text-3xl md:text-4xl font-serif text-text-primary leading-tight max-w-2xl mx-auto">
-                        "{content.story.text}"
+                <div className="text-center space-y-6">
+                    <p ref={storyRef} className="text-3xl md:text-4xl font-serif text-text-primary leading-tight max-w-2xl mx-auto flex flex-col items-center gap-2">
+                        <span>{splitText("Bu hikâye yıllardır ‘biz’di.")}</span>
+                        <span>{splitText("Bugün resmileşiyor.")}</span>
                     </p>
-                    <div className="w-16 h-[1px] bg-rose-200 mx-auto" />
-                </motion.div>
+                    <motion.div
+                        initial={{ scaleX: 0 }}
+                        whileInView={{ scaleX: 1 }}
+                        viewport={{ once: false }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                        className="w-16 h-[1px] bg-rose-200 mx-auto"
+                    />
+                </div>
 
                 {/* Info Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -36,7 +79,7 @@ export const Details: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                        viewport={{ once: false }}
                         className="group p-8 bg-rose-50/50 rounded-3xl border border-rose-100 hover:border-rose-200 transition-colors"
                     >
                         <h3 className="text-rose-500 text-sm tracking-widest uppercase font-semibold mb-6">Zaman</h3>
@@ -67,7 +110,7 @@ export const Details: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                        viewport={{ once: false }}
                         className="group p-8 bg-rose-50/50 rounded-3xl border border-rose-100 hover:border-rose-200 transition-colors"
                     >
                         <h3 className="text-rose-500 text-sm tracking-widest uppercase font-semibold mb-6">Mekân</h3>
@@ -92,7 +135,7 @@ export const Details: React.FC = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     className="rounded-3xl overflow-hidden border border-rose-100 shadow-2xl shadow-rose-100/50 h-[400px] relative z-0"
                 >
                     <iframe

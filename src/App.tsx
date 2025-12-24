@@ -35,8 +35,8 @@ function App() {
     <main className="w-full bg-bg-primary min-h-screen">
       <Hero />
       <Details />
-      <Gift />
       <FAQ />
+      <Gift />
       <Footer />
     </main>
   );

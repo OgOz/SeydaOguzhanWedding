@@ -30,6 +30,7 @@ export const FAQ: React.FC = () => {
                 scrollTrigger: {
                     trigger: containerRef.current,
                     start: "top 70%",
+                    toggleActions: "play reverse play reverse"
                 }
             }
         );

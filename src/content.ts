@@ -44,7 +44,7 @@ export const content = {
         note: "Ödeme Shopier üzerinden güvenli şekilde alınır.",
         chips: [500, 1000, 1500, 2500],
         customLabel: "Farklı Tutar",
-        button: "Katkıda Bulun",
+        button: "Katkıda Bulunun",
         successMessage: "İyi ki varsın. Bu hediye, yuvamızın küçük bir parçası olacak."
     },
     faq: [

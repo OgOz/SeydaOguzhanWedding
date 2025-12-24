@@ -31,7 +31,8 @@ export const Gift: React.FC = () => {
         "Aslında sevginiz yeterli",
         "Zahmet etmeyin :)",
         "En büyük hediye sizsiniz",
-        "Şaka şaka, buyrun",
+        "Gerçekten düşünmeniz yeter", // [NEW] Added as requested
+        "Madem öyle, buyrun",        // [CHANGED] from "Şaka şaka, buyrun" to "Madem öyle, buyrun"
         "Tamam tamam, pes ettim! 😄"
     ];
 
@@ -50,15 +51,13 @@ export const Gift: React.FC = () => {
 
     const handleInteraction = async () => {
         if (isCaught) {
-            // If already caught, clicking again (which shouldn't happen easily due to handler below)
-            // But if it does, let's copy IBAN directly or do nothing as the button changes function
             return;
         }
 
         const nextCount = clickCount + 1;
         setClickCount(nextCount);
 
-        if (nextCount < 4) {
+        if (nextCount < 5) { // Updated to < 5 because array length is now 6 (evasion steps 0-4)
             // Evasion Logic
             setMessage(messages[nextCount % messages.length]);
 
@@ -74,7 +73,7 @@ export const Gift: React.FC = () => {
         } else {
             // Caught Logic
             setIsCaught(true);
-            setMessage(messages[4]); // "Tamam pes ettim"
+            setMessage(messages[5]); // Updated index for final message
             controls.start({ x: 0, y: 0 }); // Return to center
         }
     };

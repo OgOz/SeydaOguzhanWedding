@@ -20,7 +20,8 @@ export const Hero: React.FC = () => {
             <div className="flex flex-col items-center flex-grow-[2] justify-center text-center space-y-8 mt-12 md:mt-0">
                 <motion.span
                     initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-xs md:text-sm tracking-[0.3em] uppercase text-text-secondary font-sans"
                 >
@@ -29,7 +30,8 @@ export const Hero: React.FC = () => {
 
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: false }}
                     transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
                     className="space-y-2"
                 >
@@ -42,7 +44,8 @@ export const Hero: React.FC = () => {
 
                 <motion.p
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: false }}
                     transition={{ duration: 1, delay: 0.6 }}
                     className="text-lg md:text-xl text-text-secondary font-serif italic"
                 >
@@ -58,7 +61,8 @@ export const Hero: React.FC = () => {
             {/* Signature & Actions */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false }}
                 transition={{ duration: 0.8, delay: 1 }}
                 className="flex flex-col items-center space-y-8 flex-grow-0 w-full mb-8"
             >
