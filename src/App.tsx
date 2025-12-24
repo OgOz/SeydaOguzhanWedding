@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Hero } from './components/Hero';
+import { Hero } from './sections/Hero';
 import { Details } from './components/Details';
 import { Gift } from './components/Gift';
 import { FAQ } from './components/FAQ';
