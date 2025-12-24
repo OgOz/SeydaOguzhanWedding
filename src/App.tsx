@@ -6,7 +6,12 @@ import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import Lenis from '@studio-freight/lenis';
 
+import { Preloader } from './components/Preloader';
+import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
 
   // Smooth Scroll Setup
   useEffect(() => {
@@ -33,6 +38,10 @@ function App() {
 
   return (
     <main className="w-full bg-bg-primary min-h-screen">
+      <AnimatePresence mode='wait'>
+        {isLoading && <Preloader key="preloader" onComplete={() => setIsLoading(false)} />}
+      </AnimatePresence>
+
       <Hero />
       <Details />
       <FAQ />
