@@ -86,7 +86,7 @@ export const FAQ: React.FC = () => {
                                 <h3 className="text-4xl md:text-6xl font-serif text-rose-950 shrink-0 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
                                     {item.q}
                                 </h3>
-                                <p className="text-xl md:text-3xl text-text-secondary font-light leading-snug self-end md:self-auto">
+                                <p className="text-xl md:text-3xl text-text-secondary font-light leading-snug">
                                     {item.a}
                                 </p>
                             </div>
