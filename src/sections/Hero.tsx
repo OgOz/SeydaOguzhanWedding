@@ -114,7 +114,7 @@ export const Hero: React.FC = () => {
                     </h1>
 
                     {/* Ampersand - Geometric Center (Reverted Style) */}
-                    <div className="ampersand-wrapper relative h-12 flex items-center justify-center py-1 z-10">
+                    <div className="ampersand-wrapper relative h-12 flex items-center justify-center py-1 z-10 mt-3 md:mt-4">
                         <span className="text-4xl md:text-6xl text-rose-300 font-serif italic" style={{ fontFamily: 'Times New Roman, serif' }}>&</span>
                     </div>
 
