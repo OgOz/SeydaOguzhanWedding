@@ -104,7 +104,7 @@ export const Details: React.FC = () => {
                     {/* Integrated Map Frame */}
                     <div className="w-full h-[400px] rounded-2xl overflow-hidden shadow-xl border-4 border-white ring-1 ring-gold-200 relative group">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.022060459553!2d28.851520876622743!3d40.98099777135443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14caa34de3054557%3A0x2fe1ee990a4772cf!2sTar%C4%B1k%20Akan%20Konferans%20Salonu!5e0!3m2!1str!2str!4v1766516945931!5m2!1str!2str"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.022060459553!2d28.851520876622743!3d40.98099777135443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14caa34de3054557%3A0x2fe1ee990a4772cf!2sTar%C4%B1k%20Akan%20Konferans%20Salonu!5e0!3m2!1str!2str!4v1766565419609!5m2!1str!2str"
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}

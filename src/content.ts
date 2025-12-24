@@ -21,9 +21,9 @@ export const content = {
         name: "Tarık Akan Nikâh Salonu",
         district: "Bakırköy",
         city: "İstanbul",
-        address: "Zuhuratbaba, Şükran Çiftliği Sk. No:1, 34147 Bakırköy/İstanbul",
-        mapLink: "https://maps.app.goo.gl/PbK3Z1Z1Z1Z1Z1Z1", // Placeholder, will need real link if possible, or use search query
-        embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.696342898956!2d28.8698!3d40.9899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14c32f6b3b3b3b3b%3A0x3b3b3b3b3b3b3b3b!2sTar%C4%B1k%20Akan%20Nikah%20Salonu!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str", // Placeholder - user should verify or I can try to find better
+        address: "Ataköy 2-5-6. Kısım, BeyazLale Sokağı No:6/1, 34158, Bakırköy/İstanbul",
+        mapLink: "https://maps.app.goo.gl/RcWR4cF6JPgqeQXF6", // Placeholder, will need real link if possible, or use search query
+        embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.022060459553!2d28.851520876622743!3d40.98099777135443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14caa34de3054557%3A0x2fe1ee990a4772cf!2sTar%C4%B1k%20Akan%20Konferans%20Salonu!5e0!3m2!1str!2str!4v1766565419609!5m2!1str!2str", // Placeholder - user should verify or I can try to find better
     },
     hero: {
         eyebrow: "NİKAH DAVETİYESİ",

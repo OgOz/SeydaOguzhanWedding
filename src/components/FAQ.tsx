@@ -83,8 +83,8 @@ export const FAQ: React.FC = () => {
                             onMouseEnter={() => handleMouseEnter(idx)}
                             className="group cursor-default transition-colors w-full"
                         >
-                            <div className="flex flex-col md:flex-row md:items-baseline gap-4 md:gap-12">
-                                <h3 className="text-4xl md:text-6xl font-serif text-rose-950 shrink-0 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
+                            <div className="grid grid-cols-1 md:grid-cols-[400px_1fr] md:items-baseline gap-4">
+                                <h3 className="text-4xl md:text-6xl font-serif text-rose-950 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
                                     {item.q}
                                 </h3>
                                 <p className="text-xl md:text-3xl text-text-secondary font-light leading-snug">

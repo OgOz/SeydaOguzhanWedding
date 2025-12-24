@@ -28,11 +28,11 @@ export const Gift: React.FC = () => {
 
     // Playful messages for evasion
     const messages = [
-        "Aslında sevginiz yeterli",
-        "Zahmet etmeyin :)",
-        "En büyük hediye sizsiniz",
-        "Gerçekten düşünmeniz yeter", // [NEW] Added as requested
-        "Madem öyle, buyrun",        // [CHANGED] from "Şaka şaka, buyrun" to "Madem öyle, buyrun"
+        "Aslında sevginiz yeterli ❤️",
+        "Zahmet etmeyin ✋",
+        "En büyük hediye sizsiniz ✨",
+        "Gerçekten düşünmeniz yeter 🌸",
+        "Madem öyle, buyrun 🎁",
         "Tamam tamam, pes ettim! 😄"
     ];
 
