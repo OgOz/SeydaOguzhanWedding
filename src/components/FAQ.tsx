@@ -84,7 +84,7 @@ export const FAQ: React.FC = () => {
                             className="group cursor-default transition-colors w-full"
                         >
                             <div className="grid grid-cols-1 md:grid-cols-[400px_1fr] md:items-baseline gap-4">
-                                <h3 className="text-4xl md:text-6xl font-serif text-rose-950 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
+                                <h3 className="text-4xl md:text-6xl font-serif text-rose-950 opacity-80 md:opacity-20 group-hover:opacity-100 transition-opacity duration-500">
                                     {item.q}
                                 </h3>
                                 <p className="text-xl md:text-3xl text-text-secondary font-light leading-snug">

@@ -100,23 +100,22 @@ export const Hero: React.FC = () => {
             <div ref={textRef} className="relative z-10 flex flex-col items-center text-center px-4 w-full max-w-2xl mx-auto flex-1 justify-center">
 
                 {/* Header with Expanding Lines */}
-                <div className="flex items-center gap-4 text-rose-800/60 uppercase tracking-[0.3em] text-[10px] md:text-xs font-medium mb-12">
+                <div className="flex items-center gap-4 text-rose-800/60 uppercase tracking-[0.3em] text-[10px] md:text-xs font-medium mb-8">
                     <span className="hero-line w-8 md:w-12 h-[1px] bg-rose-300 origin-right"></span>
                     <span className="hero-reveal header-text">NİKAH DAVETİYESİ</span>
                     <span className="hero-line w-8 md:w-12 h-[1px] bg-rose-300 origin-left"></span>
                 </div>
 
-                {/* Names Cluster - Perfectly Balanced */}
-                <div className="flex flex-col items-center justify-center gap-4 mb-10 w-full">
-
+                {/* Names Cluster */}
+                <div className="flex flex-col items-center justify-center gap-2 mb-8 w-full">
                     {/* Name 1 */}
                     <h1 className="text-[3.5rem] md:text-8xl lg:text-9xl font-serif text-rose-950 leading-[1.1] tracking-tight">
                         {renderTitle("Şeyda")}
                     </h1>
 
-                    {/* Ampersand - Geometric Center */}
-                    <div className="ampersand-wrapper relative h-12 flex items-center justify-center py-2 z-10">
-                        <span className="text-5xl md:text-7xl text-rose-300 font-script">&</span>
+                    {/* Ampersand - Geometric Center (Reverted Style) */}
+                    <div className="ampersand-wrapper relative h-12 flex items-center justify-center py-1 z-10">
+                        <span className="text-4xl md:text-6xl text-rose-300 font-serif italic" style={{ fontFamily: 'Times New Roman, serif' }}>&</span>
                     </div>
 
                     {/* Name 2 */}
@@ -130,7 +129,16 @@ export const Hero: React.FC = () => {
                     <p>"Bu hikâye yıllardır ‘biz’di.<br className="md:hidden" /> Bugün resmileşiyor."</p>
                 </div>
 
-                {/* Date & Location Pill - Modernized */}
+                {/* Hold Button (Before Date) */}
+                <div className="hero-reveal mb-10">
+                    <HoldButton
+                        onComplete={() => {
+                            document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                    />
+                </div>
+
+                {/* Date & Location Pill */}
                 <div className="hero-reveal flex flex-col items-center gap-4">
                     <div className="flex items-center gap-3 text-rose-950 font-serif text-xl md:text-2xl tracking-wide">
                         <span>7 Şubat 2026</span>
@@ -138,26 +146,19 @@ export const Hero: React.FC = () => {
                         <span>16:30</span>
                     </div>
 
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-rose-100/50">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
-                        <span className="text-[10px] md:text-xs uppercase tracking-widest text-rose-900/70 font-semibold">Tarık Akan Nikâh Salonu, Bakırköy</span>
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-rose-100/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+                            <span className="text-[10px] md:text-xs uppercase tracking-widest text-rose-900/70 font-semibold">Tarık Akan Nikâh Salonu, Bakırköy</span>
+                        </div>
+                        <span className="text-rose-900/40 text-[10px] tracking-[0.2em] uppercase">Gelin, birlikte kutlayalım</span>
                     </div>
                 </div>
 
             </div>
 
-            {/* Bottom Call to Action */}
-            <div className="hero-reveal relative z-20 flex flex-col items-center gap-6 pb-12 w-full">
-                <div className="flex flex-col items-center gap-2 text-rose-900/40 text-[10px] tracking-[0.2em] uppercase mb-2">
-                    <span>Gelin, birlikte kutlayalım</span>
-                </div>
-
-                <HoldButton
-                    onComplete={() => {
-                        document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                />
-            </div>
+            {/* Bottom Spacer */}
+            <div className="flex-none h-[5vh]"></div>
 
         </div >
     );
