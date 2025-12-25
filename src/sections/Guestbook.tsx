@@ -18,6 +18,97 @@ interface Photo {
     storagePath?: string; // Path to the file in Firebase Storage
 }
 
+const PhotoCard: React.FC<{
+    photo: Photo;
+    userId: string;
+    onDelete: (photo: Photo) => void;
+}> = ({ photo, userId, onDelete }) => {
+    const [timeLeft, setTimeLeft] = useState<number>(0);
+    const isOwner = photo.userId === userId;
+
+    useEffect(() => {
+        if (!isOwner || !photo.timestamp) return;
+
+        const calculateTimeLeft = () => {
+            const now = new Date().getTime();
+            const photoTime = photo.timestamp!.getTime();
+            const diff = 30 - Math.floor((now - photoTime) / 1000);
+            return diff > 0 ? diff : 0;
+        };
+
+        // Initial check
+        setTimeLeft(calculateTimeLeft());
+
+        // Update every second
+        const timer = setInterval(() => {
+            const remaining = calculateTimeLeft();
+            setTimeLeft(remaining);
+            if (remaining <= 0) clearInterval(timer);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [photo.timestamp, isOwner]);
+
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.4 }}
+            style={{ rotate: photo.rotation }}
+            className="bg-white p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow w-full max-w-[320px] mx-auto relative group break-inside-avoid mb-8"
+        >
+            {/* Pin Effect */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose-400 shadow-sm z-10 border border-white/50"></div>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-300 to-rose-500 opacity-80 animate-pulse"></div>
+
+            {/* Delete Button (Only visible to owner within 30s) */}
+            <AnimatePresence>
+                {isOwner && timeLeft > 0 && (
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        onClick={(e) => { e.stopPropagation(); onDelete(photo); }}
+                        className="absolute -right-3 -top-3 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg text-rose-500 border border-rose-100 z-20 overflow-hidden group/delete"
+                        title="Silmek için son saniyeler!"
+                    >
+                        {/* Countdown BG */}
+                        <div
+                            className="absolute inset-0 bg-rose-50 origin-bottom transition-transform duration-1000 linear opacity-50"
+                            style={{ transform: `scaleY(${timeLeft / 30})` }}
+                        />
+
+                        <div className="relative flex items-center justify-center">
+                            <Trash2 size={16} className="group-hover/delete:scale-110 transition-transform" />
+                            <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover/delete:opacity-100 transition-opacity whitespace-nowrap">
+                                {timeLeft}sn kaldı
+                            </span>
+                        </div>
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
+            <div className="aspect-[4/5] w-full bg-stone-100 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5">
+                <img src={photo.url} alt="Memory" className="w-full h-full object-cover" loading="lazy" />
+            </div>
+
+            {photo.caption && (
+                <div className="text-center font-script text-stone-600 text-xl leading-tight px-2 pt-1 break-words">
+                    {photo.caption}
+                </div>
+            )}
+
+            {photo.timestamp && (
+                <div className="absolute bottom-2 right-4 text-[10px] text-stone-300 font-mono">
+                    {photo.timestamp.toLocaleDateString('tr-TR')} {photo.timestamp.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+            )}
+        </motion.div>
+    );
+};
+
 export const Guestbook: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,7 +162,7 @@ export const Guestbook: React.FC = () => {
                     storagePath: data.storagePath,
                     // Handle timestamp: it might be null initially if using serverTimestamp and we read it back instantly,
                     // or it might be a proper Firestore Timestamp.
-                    timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(),
+                    timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(), // Local fallback if pending
                 } as Photo;
             });
             setPhotos(fetchedPhotos);
@@ -135,7 +226,7 @@ export const Guestbook: React.FC = () => {
     };
 
     const handleDelete = async (photo: Photo) => {
-        if (!confirm("Bu anıyı silmek istediğine emin misin?")) return;
+        if (!confirm("Bu anıyı silmek istiyor musun? İşlem geri alınamaz.")) return;
 
         try {
             // 1. Delete from Firestore
@@ -144,7 +235,7 @@ export const Guestbook: React.FC = () => {
             // 2. Delete from Storage if storagePath exists
             if (photo.storagePath) {
                 const imageRef = ref(storage, photo.storagePath);
-                await deleteObject(imageRef);
+                await deleteObject(imageRef).catch(e => console.warn("Storage delete warn:", e));
             }
 
         } catch (error) {
@@ -173,7 +264,7 @@ export const Guestbook: React.FC = () => {
                     </div>
                     <h2 className="text-4xl md:text-5xl font-serif text-stone-800 mb-4">Anı Duvarı</h2>
                     <p className="text-stone-500 max-w-lg mx-auto">
-                        En güzel anılarımızı paylaşıyoruz. Siz de çektiğiniz fotoğrafları ekleyin, hikayemize ortak olun.
+                        En güzel anılarımızı paylaşıyoruz. Siz de çektiğiniz fotoğrafı ekleyin, hikayemize ortak olun.
                     </p>
                 </div>
 
@@ -253,50 +344,15 @@ export const Guestbook: React.FC = () => {
                 </div>
 
                 {/* Timeline / Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+                <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
                     <AnimatePresence>
                         {photos.map((photo) => (
-                            <motion.div
+                            <PhotoCard
                                 key={photo.id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.5 }}
-                                transition={{ duration: 0.4 }}
-                                style={{ rotate: photo.rotation }}
-                                className="bg-white p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow w-full max-w-[320px] mx-auto relative group"
-                            >
-                                {/* Pin Effect */}
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose-400 shadow-sm z-10 border border-white/50"></div>
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-300 to-rose-500 opacity-80 animate-pulse"></div>
-
-                                {/* Delete Button (Only visible to owner) */}
-                                {photo.userId === userId && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleDelete(photo); }}
-                                        className="absolute -right-2 -top-2 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md text-stone-400 hover:text-red-500 hover:scale-110 transition-all z-20 opacity-0 group-hover:opacity-100"
-                                        title="Anıyı sil"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
-
-                                <div className="aspect-[4/5] w-full bg-stone-100 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5">
-                                    <img src={photo.url} alt="Memory" className="w-full h-full object-cover" loading="lazy" />
-                                </div>
-
-                                {photo.caption && (
-                                    <div className="text-center font-script text-stone-600 text-xl leading-tight px-2 pt-1 break-words">
-                                        {photo.caption}
-                                    </div>
-                                )}
-
-                                {photo.timestamp && (
-                                    <div className="absolute bottom-2 right-4 text-[10px] text-stone-300 font-mono">
-                                        {photo.timestamp.toLocaleDateString('tr-TR')}
-                                    </div>
-                                )}
-                            </motion.div>
+                                photo={photo}
+                                userId={userId}
+                                onDelete={handleDelete}
+                            />
                         ))}
                     </AnimatePresence>
 
