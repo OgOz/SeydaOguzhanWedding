@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Section } from '../components/Section';
-import { Camera, Upload, X, Loader2 } from 'lucide-react';
+import { Camera, Upload, X, Loader2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { db, storage } from '../lib/firebase'; // Import firebase services
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, deleteDoc, doc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 interface Photo {
     id: string;
@@ -14,6 +14,8 @@ interface Photo {
     caption?: string;
     timestamp: Date | null;
     rotation: number;
+    userId?: string; // ID of the uploader
+    storagePath?: string; // Path to the file in Firebase Storage
 }
 
 export const Guestbook: React.FC = () => {
@@ -27,6 +29,7 @@ export const Guestbook: React.FC = () => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [caption, setCaption] = useState('');
+    const [userId, setUserId] = useState<string>(''); // Identifying the current user
 
     useGSAP(() => {
         gsap.from(".retro-title", {
@@ -41,6 +44,16 @@ export const Guestbook: React.FC = () => {
         });
     }, { scope: containerRef });
 
+    // Initialize User ID
+    useEffect(() => {
+        let storedId = localStorage.getItem('wedding_guest_id');
+        if (!storedId) {
+            storedId = crypto.randomUUID();
+            localStorage.setItem('wedding_guest_id', storedId);
+        }
+        setUserId(storedId);
+    }, []);
+
     // Fetch Photos from Firebase Realtime
     useEffect(() => {
         // Query the 'guestbook' collection, ordered by timestamp descending
@@ -54,12 +67,16 @@ export const Guestbook: React.FC = () => {
                     url: data.url,
                     caption: data.caption,
                     rotation: data.rotation,
+                    userId: data.userId,
+                    storagePath: data.storagePath,
                     // Handle timestamp: it might be null initially if using serverTimestamp and we read it back instantly,
                     // or it might be a proper Firestore Timestamp.
                     timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(),
                 } as Photo;
             });
             setPhotos(fetchedPhotos);
+        }, (error) => {
+            console.error("Realtime listener error:", error);
         });
 
         return () => unsubscribe();
@@ -69,9 +86,9 @@ export const Guestbook: React.FC = () => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
 
-            // Validate file size (e.g., max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Dosya boyutu çok büyük! Lütfen 5MB'dan küçük bir fotoğraf seçin.");
+            // Validate file size (e.g., max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert("Dosya boyutu çok büyük! Lütfen 10MB'dan küçük bir fotoğraf seçin.");
                 return;
             }
 
@@ -100,8 +117,10 @@ export const Guestbook: React.FC = () => {
             await addDoc(collection(db, 'guestbook'), {
                 url: downloadURL,
                 caption: caption,
-                timestamp: serverTimestamp(),
+                timestamp: serverTimestamp(), // Server-side timestamp
                 rotation: Math.random() * 6 - 3, // Random rotation between -3 and 3
+                userId: userId, // Associate photo with this user
+                storagePath: filename // Store path for easier deletion
             });
 
             // 3. Reset UI
@@ -112,6 +131,25 @@ export const Guestbook: React.FC = () => {
             alert("Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (photo: Photo) => {
+        if (!confirm("Bu anıyı silmek istediğine emin misin?")) return;
+
+        try {
+            // 1. Delete from Firestore
+            await deleteDoc(doc(db, 'guestbook', photo.id));
+
+            // 2. Delete from Storage if storagePath exists
+            if (photo.storagePath) {
+                const imageRef = ref(storage, photo.storagePath);
+                await deleteObject(imageRef);
+            }
+
+        } catch (error) {
+            console.error("Error deleting photo:", error);
+            alert("Silinirken bir hata oluştu.");
         }
     };
 
@@ -226,11 +264,22 @@ export const Guestbook: React.FC = () => {
                                 exit={{ opacity: 0, scale: 0.5 }}
                                 transition={{ duration: 0.4 }}
                                 style={{ rotate: photo.rotation }}
-                                className="bg-white p-4 pb-8 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow w-full max-w-[320px] mx-auto relative group"
+                                className="bg-white p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow w-full max-w-[320px] mx-auto relative group"
                             >
                                 {/* Pin Effect */}
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose-400 shadow-sm z-10 border border-white/50"></div>
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-300 to-rose-500 opacity-80 animate-pulse"></div>
+
+                                {/* Delete Button (Only visible to owner) */}
+                                {photo.userId === userId && (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(photo); }}
+                                        className="absolute -right-2 -top-2 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md text-stone-400 hover:text-red-500 hover:scale-110 transition-all z-20 opacity-0 group-hover:opacity-100"
+                                        title="Anıyı sil"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                )}
 
                                 <div className="aspect-[4/5] w-full bg-stone-100 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5">
                                     <img src={photo.url} alt="Memory" className="w-full h-full object-cover" loading="lazy" />
