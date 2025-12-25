@@ -63,29 +63,35 @@ const PhotoCard: React.FC<{
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose-400 shadow-sm z-10 border border-white/50"></div>
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-300 to-rose-500 opacity-80 animate-pulse"></div>
 
-            {/* Delete Button (Only visible to owner within 30s) */}
+            {/* Delete Button (Visible Countdown) */}
             <AnimatePresence>
                 {isOwner && timeLeft > 0 && (
                     <motion.button
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.5 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
                         onClick={(e) => { e.stopPropagation(); onDelete(photo); }}
-                        className="absolute -right-3 -top-3 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg text-rose-500 border border-rose-100 z-20 overflow-hidden group/delete"
-                        title="Silmek için son saniyeler!"
+                        className="absolute -right-2 -top-4 flex items-center gap-1.5 bg-white pl-2 pr-3 py-1.5 rounded-full shadow-lg text-rose-500 border border-rose-100 z-20 hover:bg-rose-50 transition-colors"
+                        title="Silmek için kalan süre"
                     >
-                        {/* Countdown BG */}
-                        <div
-                            className="absolute inset-0 bg-rose-50 origin-bottom transition-transform duration-1000 linear opacity-50"
-                            style={{ transform: `scaleY(${timeLeft / 30})` }}
-                        />
-
-                        <div className="relative flex items-center justify-center">
-                            <Trash2 size={16} className="group-hover/delete:scale-110 transition-transform" />
-                            <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover/delete:opacity-100 transition-opacity whitespace-nowrap">
-                                {timeLeft}sn kaldı
-                            </span>
+                        <div className="relative flex items-center justify-center w-5 h-5">
+                            <svg className="absolute inset-0 -rotate-90" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke="#fecdd3" strokeWidth="3" fill="none" />
+                                <motion.circle
+                                    cx="12" cy="12" r="10"
+                                    stroke="#f43f5e"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    initial={{ pathLength: 1 }}
+                                    animate={{ pathLength: timeLeft / 30 }}
+                                    transition={{ duration: 1, ease: "linear" }}
+                                />
+                            </svg>
+                            <Trash2 size={10} className="relative z-10 text-rose-600" />
                         </div>
+                        <span className="text-xs font-semibold tabular-nums leading-none">
+                            Sil ({timeLeft})
+                        </span>
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -306,7 +312,8 @@ export const Guestbook: React.FC = () => {
                                 <button
                                     onClick={handleCloseUpload}
                                     disabled={isSubmitting}
-                                    className="absolute top-4 right-4 text-stone-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                                    className="absolute -top-3 -right-3 p-2 bg-white text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-full shadow-lg border border-stone-100 transition-all z-20"
+                                    title="İptal"
                                 >
                                     <X size={20} />
                                 </button>
