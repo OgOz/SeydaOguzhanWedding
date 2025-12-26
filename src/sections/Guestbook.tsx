@@ -4,8 +4,8 @@ import { Camera, Upload, X, Loader2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { db, storage } from '../lib/firebase'; // Import firebase services
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, deleteDoc, doc } from 'firebase/firestore';
+import { db, storage } from '../lib/firebase';
+import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, deleteDoc, doc, limit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 interface Photo {
@@ -14,15 +14,16 @@ interface Photo {
     caption?: string;
     timestamp: Date | null;
     rotation: number;
-    userId?: string; // ID of the uploader
-    storagePath?: string; // Path to the file in Firebase Storage
+    userId?: string;
+    storagePath?: string;
 }
 
 const PhotoCard: React.FC<{
     photo: Photo;
     userId: string;
+    isAdmin: boolean;
     onDelete: (photo: Photo) => void;
-}> = ({ photo, userId, onDelete }) => {
+}> = ({ photo, userId, onDelete, isAdmin }) => {
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const isOwner = photo.userId === userId;
 
@@ -36,10 +37,8 @@ const PhotoCard: React.FC<{
             return diff > 0 ? diff : 0;
         };
 
-        // Initial check
         setTimeLeft(calculateTimeLeft());
 
-        // Update every second
         const timer = setInterval(() => {
             const remaining = calculateTimeLeft();
             setTimeLeft(remaining);
@@ -59,13 +58,21 @@ const PhotoCard: React.FC<{
             style={{ rotate: photo.rotation }}
             className="bg-white p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow w-full max-w-[320px] mx-auto relative group break-inside-avoid mb-8"
         >
-            {/* Pin Effect */}
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose-400 shadow-sm z-10 border border-white/50"></div>
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-300 to-rose-500 opacity-80 animate-pulse"></div>
 
-            {/* Delete Button (Visible Countdown) */}
+            {isAdmin && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(photo); }}
+                    className="absolute -right-3 -top-3 w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg z-30 hover:bg-red-700 hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+                    title="Yönetici Silme Yetkisi"
+                >
+                    <Trash2 size={18} />
+                </button>
+            )}
+
             <AnimatePresence>
-                {isOwner && timeLeft > 0 && (
+                {!isAdmin && isOwner && timeLeft > 0 && (
                     <motion.button
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -121,27 +128,42 @@ export const Guestbook: React.FC = () => {
 
     // State
     const [photos, setPhotos] = useState<Photo[]>([]);
-    const [isUploading, setIsUploading] = useState(false); // Controls the UI state (form open/close)
-    const [isSubmitting, setIsSubmitting] = useState(false); // Controls the actual upload process
+    const [isUploading, setIsUploading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [caption, setCaption] = useState('');
-    const [userId, setUserId] = useState<string>(''); // Identifying the current user
+    const [userId, setUserId] = useState<string>('');
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(10);
+
+    const headerText = "Bu hikâye yıllardır ‘biz’di. Şimdi resmileşiyor.";
 
     useGSAP(() => {
-        gsap.from(".retro-title", {
+        const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: containerRef.current,
-                start: "top 80%",
-            },
+                start: "top 70%",
+            }
+        });
+
+        tl.from(".retro-title-content", {
             y: 30,
             opacity: 0,
             duration: 1,
             ease: "power3.out"
-        });
+        })
+            .from(".typewriter-char", {
+                opacity: 0,
+                y: 5,
+                stagger: 0.03,
+                duration: 0.05,
+                ease: "none"
+            }, "-=0.5");
+
     }, { scope: containerRef });
 
-    // Initialize User ID
+    // Initialize User ID & Check Admin Status
     useEffect(() => {
         let storedId = localStorage.getItem('wedding_guest_id');
         if (!storedId) {
@@ -149,12 +171,30 @@ export const Guestbook: React.FC = () => {
             localStorage.setItem('wedding_guest_id', storedId);
         }
         setUserId(storedId);
+
+        const params = new URLSearchParams(window.location.search);
+        const adminParam = params.get('admin');
+        const storedAdmin = localStorage.getItem('wedding_admin_auth');
+
+        const ADMIN_KEY = import.meta.env.VITE_ADMIN_PASSWORD || 'seydaoguzhan2026';
+
+        if (adminParam === ADMIN_KEY || storedAdmin === 'true') {
+            setIsAdmin(true);
+            localStorage.setItem('wedding_admin_auth', 'true');
+            if (adminParam) {
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+            }
+        }
     }, []);
 
-    // Fetch Photos from Firebase Realtime
+    // Fetch Photos
     useEffect(() => {
-        // Query the 'guestbook' collection, ordered by timestamp descending
-        const q = query(collection(db, 'guestbook'), orderBy('timestamp', 'desc'));
+        const q = query(
+            collection(db, 'guestbook'),
+            orderBy('timestamp', 'desc'),
+            limit(visibleCount)
+        );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedPhotos = snapshot.docs.map(doc => {
@@ -166,9 +206,7 @@ export const Guestbook: React.FC = () => {
                     rotation: data.rotation,
                     userId: data.userId,
                     storagePath: data.storagePath,
-                    // Handle timestamp: it might be null initially if using serverTimestamp and we read it back instantly,
-                    // or it might be a proper Firestore Timestamp.
-                    timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(), // Local fallback if pending
+                    timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(),
                 } as Photo;
             });
             setPhotos(fetchedPhotos);
@@ -177,18 +215,15 @@ export const Guestbook: React.FC = () => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [visibleCount]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-
-            // Validate file size (e.g., max 10MB)
             if (file.size > 10 * 1024 * 1024) {
                 alert("Dosya boyutu çok büyük! Lütfen 10MB'dan küçük bir fotoğraf seçin.");
                 return;
             }
-
             setSelectedFile(file);
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
@@ -201,28 +236,22 @@ export const Guestbook: React.FC = () => {
 
         try {
             setIsSubmitting(true);
-
-            // 1. Upload Image to Firebase Storage
-            // Create a unique filename
             const filename = `guestbook/${Date.now()}-${selectedFile.name}`;
             const storageRef = ref(storage, filename);
 
             const snapshot = await uploadBytes(storageRef, selectedFile);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
-            // 2. Save Metadata to Firestore
             await addDoc(collection(db, 'guestbook'), {
                 url: downloadURL,
                 caption: caption,
-                timestamp: serverTimestamp(), // Server-side timestamp
-                rotation: Math.random() * 6 - 3, // Random rotation between -3 and 3
-                userId: userId, // Associate photo with this user
-                storagePath: filename // Store path for easier deletion
+                timestamp: serverTimestamp(),
+                rotation: Math.random() * 6 - 3,
+                userId: userId,
+                storagePath: filename
             });
 
-            // 3. Reset UI
             handleCloseUpload();
-
         } catch (error) {
             console.error("Error uploading photo:", error);
             alert("Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
@@ -235,15 +264,11 @@ export const Guestbook: React.FC = () => {
         if (!confirm("Bu anıyı silmek istiyor musun? İşlem geri alınamaz.")) return;
 
         try {
-            // 1. Delete from Firestore
             await deleteDoc(doc(db, 'guestbook', photo.id));
-
-            // 2. Delete from Storage if storagePath exists
             if (photo.storagePath) {
                 const imageRef = ref(storage, photo.storagePath);
                 await deleteObject(imageRef).catch(e => console.warn("Storage delete warn:", e));
             }
-
         } catch (error) {
             console.error("Error deleting photo:", error);
             alert("Silinirken bir hata oluştu.");
@@ -262,19 +287,24 @@ export const Guestbook: React.FC = () => {
         <Section id="guestbook" className="py-24 bg-stone-100 overflow-hidden">
             <div ref={containerRef} className="max-w-6xl mx-auto px-6">
 
-                {/* Header */}
-                <div className="text-center mb-16 retro-title">
-                    <div className="flex items-center justify-center gap-2 text-rose-500 font-bold tracking-[0.2em] uppercase mb-4">
-                        <Camera size={20} />
-                        <span>SİZDEN KARELER</span>
+                <div className="text-center mb-16 px-4">
+                    <div className="retro-title-content">
+                        <div className="flex items-center justify-center gap-2 text-rose-500 font-bold tracking-[0.2em] uppercase mb-4">
+                            <Camera size={20} />
+                            <span>SİZDEN KARELER</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium">Anı Duvarı</h2>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-serif text-stone-800 mb-4">Anı Duvarı</h2>
-                    <p className="text-stone-500 max-w-lg mx-auto">
-                        En güzel anılarımızı paylaşıyoruz. Siz de çektiğiniz fotoğrafı ekleyin, hikayemize ortak olun.
+
+                    <p className="text-stone-600 max-w-lg mx-auto text-lg md:text-xl font-serif italic leading-relaxed h-[60px] md:h-[40px] flex items-center justify-center flex-wrap">
+                        {headerText.split("").map((char, index) => (
+                            <span key={index} className="typewriter-char inline-block whitespace-pre">
+                                {char}
+                            </span>
+                        ))}
                     </p>
                 </div>
 
-                {/* Upload Area */}
                 <div className="mb-16 flex flex-col items-center relative z-20">
                     <AnimatePresence mode="wait">
                         {!isUploading ? (
@@ -350,7 +380,6 @@ export const Guestbook: React.FC = () => {
                     </AnimatePresence>
                 </div>
 
-                {/* Timeline / Grid */}
                 <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
                     <AnimatePresence>
                         {photos.map((photo) => (
@@ -358,6 +387,7 @@ export const Guestbook: React.FC = () => {
                                 key={photo.id}
                                 photo={photo}
                                 userId={userId}
+                                isAdmin={isAdmin}
                                 onDelete={handleDelete}
                             />
                         ))}
@@ -369,6 +399,17 @@ export const Guestbook: React.FC = () => {
                         </div>
                     )}
                 </div>
+
+                {photos.length >= visibleCount && (
+                    <div className="flex justify-center mt-12">
+                        <button
+                            onClick={() => setVisibleCount(prev => prev + 10)}
+                            className="bg-white px-8 py-3 rounded-full text-stone-600 font-serif shadow-sm border border-stone-200 hover:border-rose-300 hover:text-rose-500 hover:shadow-md transition-all active:scale-95"
+                        >
+                            Daha Fazla Göster
+                        </button>
+                    </div>
+                )}
 
             </div>
         </Section>
