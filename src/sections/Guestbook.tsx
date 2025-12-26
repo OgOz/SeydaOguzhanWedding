@@ -135,7 +135,7 @@ export const Guestbook: React.FC = () => {
     const [caption, setCaption] = useState('');
     const [userId, setUserId] = useState<string>('');
     const [isAdmin, setIsAdmin] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(10);
+    const [visibleCount, setVisibleCount] = useState(6);
 
     const headerText = "Bu hikâye yıllardır ‘biz’di. Şimdi resmileşiyor.";
 
@@ -403,7 +403,7 @@ export const Guestbook: React.FC = () => {
                 {photos.length >= visibleCount && (
                     <div className="flex justify-center mt-12">
                         <button
-                            onClick={() => setVisibleCount(prev => prev + 10)}
+                            onClick={() => setVisibleCount(prev => prev + 6)}
                             className="bg-white px-8 py-3 rounded-full text-stone-600 font-serif shadow-sm border border-stone-200 hover:border-rose-300 hover:text-rose-500 hover:shadow-md transition-all active:scale-95"
                         >
                             Daha Fazla Göster
