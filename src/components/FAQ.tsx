@@ -35,6 +35,35 @@ export const FAQ: React.FC = () => {
             }
         );
 
+        // Mobile: Scroll-Driven Interaction (Auto-Tilt & Shine)
+        const mm = gsap.matchMedia();
+        mm.add("(max-width: 768px)", () => {
+            cards.forEach((card, i) => {
+                if (!card) return;
+
+                // Set initial spotlight for mobile
+                gsap.set(card, {
+                    '--mouse-x': '10%',
+                    '--mouse-y': '10%'
+                });
+
+                // Scrub animation: As you scroll past, the card tilts and shines
+                gsap.to(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 120%", // Start before it enters
+                        end: "bottom -20%", // End after it leaves
+                        scrub: 1.5,
+                    },
+                    rotateX: -5,  // Slight nod
+                    rotateY: i % 2 === 0 ? 3 : -3, // Alternate subtle sideways tilt
+                    '--mouse-x': '90%', // Spotlight travels diagonally
+                    '--mouse-y': '90%',
+                    ease: "power1.inOut"
+                });
+            });
+        });
+
     }, { scope: containerRef });
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {

@@ -74,6 +74,16 @@ export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
             force3D: true
         });
 
+        // Hold Hint Pulse
+        gsap.to(".hold-hint", {
+            opacity: 0.6,
+            scale: 0.95,
+            yoyo: true,
+            repeat: -1,
+            duration: 1.5,
+            ease: "sine.inOut"
+        });
+
     }, { scope: containerRef });
 
     const renderTitle = (text: string) => {
@@ -127,13 +137,20 @@ export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
                 </div>
 
                 {/* Hold Button */}
-                <div className="hero-reveal mb-8 md:mb-10 scale-90 md:scale-100">
+                <div className="hero-reveal mb-2 md:mb-4 scale-90 md:scale-100 relative z-20">
                     <HoldButton
                         onComplete={() => {
                             if (onUnlock) onUnlock();
+                            // Hide hint on complete
+                            gsap.to(".hold-hint", { opacity: 0, duration: 0.5 });
                             document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' });
                         }}
                     />
+                </div>
+
+                {/* Hold Hint */}
+                <div className="hero-reveal hold-hint text-rose-400 text-xs md:text-sm font-medium tracking-[0.2em] uppercase opacity-0 mb-8 md:mb-10">
+                    Kalbe Basılı Tutun
                 </div>
 
                 {/* Date & Location Pill */}

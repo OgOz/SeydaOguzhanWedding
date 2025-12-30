@@ -20,9 +20,11 @@ function App() {
   useEffect(() => {
     if (isLoading || isLocked) {
       document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none'; // Strict mobile lock
       if (lenisRef.current) lenisRef.current.stop();
     } else {
       document.body.style.overflow = '';
+      document.body.style.touchAction = '';
       if (lenisRef.current) lenisRef.current.start();
     }
   }, [isLoading, isLocked]);

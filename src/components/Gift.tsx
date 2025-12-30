@@ -32,13 +32,13 @@ export const Gift: React.FC = () => {
     const messages = [
         "Aslında sevginiz yeterli ❤️",
         "Zahmet etmeyin ✋",
+        "Ciddiyiz, gerek yok! 🙈",
         "En büyük hediye sizsiniz ✨",
-        "Gerçekten düşünmeniz yeter 🌸",
-        "Lütfen, gerek yok! 🙈",
-        "Şaka yapmıyoruz! 😄",
-        "İlla da katkı mı diyorsunuz? 🤔",
-        "Tamam pes ediyoruz... Şaka! 🏃‍♂️",
-        "Bakın gerçekten kaçıyorum! 💨",
+        "Bakın kaçıyorum! 💨",
+        "Yakalayamazsınız ki... 🤪",
+        "Hala uğraşıyor musunuz? 🤔",
+        "Tamam pes ettim... Şaka! 🏃‍♂️",
+        "Çok hızlısınız! ⚡",
         "Peki peki, kazandınız 🎁",
     ];
 
@@ -63,8 +63,8 @@ export const Gift: React.FC = () => {
         const nextCount = clickCount + 1;
         setClickCount(nextCount);
 
-        // Logic adjustment: We want to show messages 0 to 5 as evasion steps.
-        // Message 6 ("Çok teşekkür ederiz") is the final "Caught" state message.
+        // Logic adjustment: We want to show messages 0 to 8 as evasion steps.
+        // Message 9 ("Peki peki, kazandınız") is the final "Caught" state message.
         // So we evade as long as nextCount < messages.length - 1
         if (nextCount < messages.length - 1) {
             // Evasion Logic
@@ -77,7 +77,7 @@ export const Gift: React.FC = () => {
             await controls.start({
                 x,
                 y,
-                transition: { duration: 0.2, type: "spring", stiffness: 300 }
+                transition: { duration: 0.1, type: "spring", stiffness: 400, damping: 10 }
             });
         } else {
             // Caught Logic (Final Step)
