@@ -56,10 +56,9 @@ const PhotoCard: React.FC<{
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.4 }}
             style={{ rotate: photo.rotation }}
-            className="bg-white p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow w-full max-w-[320px] mx-auto relative group break-inside-avoid mb-8"
+            className="bg-white/80 backdrop-blur-md p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(244,63,94,0.25)] hover:-translate-y-2 transition-all duration-300 w-full max-w-[320px] mx-auto relative group break-inside-avoid mb-8 border border-white/50 rounded-xl"
         >
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose-400 shadow-sm z-10 border border-white/50"></div>
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-300 to-rose-500 opacity-80 animate-pulse"></div>
+            {/* Pins Removed for Modern Look */}
 
             {isAdmin && (
                 <button

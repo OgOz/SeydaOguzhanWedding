@@ -28,7 +28,7 @@ export const Gift: React.FC = () => {
     // IBAN Constant - Should probably be dynamic or coming from config, but hardcoded here for now
     const IBAN = "TR49 0006 2000 7790 0006 6050 39"; // This might need to be verified or updated by user later if it's a placeholder
 
-    // Updated playful messages sequence
+    // Updated playful messages sequence (15 steps)
     const messages = [
         "Aslında sevginiz yeterli ❤️",
         "Zahmet etmeyin ✋",
@@ -39,6 +39,11 @@ export const Gift: React.FC = () => {
         "Hala uğraşıyor musunuz? 🤔",
         "Tamam pes ettim... Şaka! 🏃‍♂️",
         "Çok hızlısınız! ⚡",
+        "Tamam, tamam... Az kaldı! 🤏",
+        "Şaka şaka, yakalayamazsınız! 🎢",
+        "Son şansınız olabilir... 🎲",
+        "Beni hafife alıyorsunuz! ⚡",
+        "Neyse, kıyamadım... 🏳️",
         "Peki peki, kazandınız 🎁",
     ];
 

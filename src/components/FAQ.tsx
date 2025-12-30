@@ -154,18 +154,18 @@ export const FAQ: React.FC = () => {
                             onMouseMove={(e) => handleMouseMove(e, idx)}
                             onMouseLeave={() => handleMouseLeave(idx)}
                             onMouseEnter={() => handleMouseEnter(idx)}
-                            className="group relative h-[400px] md:h-[500px] rounded-[2rem] bg-white border border-stone-200 shadow-xl overflow-hidden cursor-default preserve-3d will-change-transform"
+                            className="group relative h-[400px] md:h-[500px] rounded-[2rem] bg-white border border-stone-200 shadow-xl overflow-hidden cursor-default preserve-3d will-change-transform hover:shadow-[0_20px_50px_-12px_rgba(244,63,94,0.25)] hover:border-rose-300 transition-all duration-500"
                             style={{
                                 transformStyle: 'preserve-3d',
                                 '--mouse-x': '50%',
                                 '--mouse-y': '50%'
                             } as React.CSSProperties}
                         >
-                            {/* Spotlight Gradient */}
+                            {/* Spotlight Gradient - Enhanced Color */}
                             <div
                                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"
                                 style={{
-                                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(244, 63, 94, 0.06), transparent 40%)`
+                                    background: `radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(244, 63, 94, 0.08), transparent 40%)`
                                 }}
                             />
 
