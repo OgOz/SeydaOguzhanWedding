@@ -6,7 +6,7 @@ import { HoldButton } from '../components/HoldButton';
 
 // ... imports
 
-export const Hero: React.FC = () => {
+export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
 
@@ -130,6 +130,7 @@ export const Hero: React.FC = () => {
                 <div className="hero-reveal mb-8 md:mb-10 scale-90 md:scale-100">
                     <HoldButton
                         onComplete={() => {
+                            if (onUnlock) onUnlock();
                             document.getElementById('details')?.scrollIntoView({ behavior: 'smooth' });
                         }}
                     />

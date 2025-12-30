@@ -13,6 +13,17 @@ import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLocked, setIsLocked] = useState(true);
+
+  // Scroll Lock Logic
+  useEffect(() => {
+    if (isLoading || isLocked) {
+      document.body.style.overflow = 'hidden';
+      // Also stop lenis if possible, but overflow hidden usually works check interaction
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isLoading, isLocked]);
 
   // Smooth Scroll Setup
   useEffect(() => {
@@ -25,6 +36,9 @@ function App() {
       touchMultiplier: 2,
     });
 
+    // Optional: Stop lenis when locked just to be safe (though overflow hidden usually catches touches)
+    // But since lenis instance is local, we rely on overflow hidden.
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -35,7 +49,7 @@ function App() {
     return () => {
       lenis.destroy();
     };
-  }, []);
+  }, []); // Re-running this might re-create lenis, better keep it empty dep.
 
   return (
     <main className="w-full bg-bg-primary min-h-screen">
@@ -43,7 +57,7 @@ function App() {
         {isLoading && <Preloader key="preloader" onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
 
-      <Hero />
+      <Hero onUnlock={() => setIsLocked(false)} />
       <Details />
       <Guestbook />
       <FAQ />
