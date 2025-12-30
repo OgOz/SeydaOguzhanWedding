@@ -8,20 +8,22 @@ import { Footer } from './components/Footer';
 import Lenis from '@studio-freight/lenis';
 
 import { Preloader } from './components/Preloader';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(true);
+  const lenisRef = useRef<Lenis | null>(null);
 
   // Scroll Lock Logic
   useEffect(() => {
     if (isLoading || isLocked) {
       document.body.style.overflow = 'hidden';
-      // Also stop lenis if possible, but overflow hidden usually works check interaction
+      if (lenisRef.current) lenisRef.current.stop();
     } else {
       document.body.style.overflow = '';
+      if (lenisRef.current) lenisRef.current.start();
     }
   }, [isLoading, isLocked]);
 
@@ -36,8 +38,10 @@ function App() {
       touchMultiplier: 2,
     });
 
-    // Optional: Stop lenis when locked just to be safe (though overflow hidden usually catches touches)
-    // But since lenis instance is local, we rely on overflow hidden.
+    lenisRef.current = lenis;
+
+    // Initial check in case it mounts locked
+    if (isLocked) lenis.stop();
 
     function raf(time: number) {
       lenis.raf(time);
@@ -48,8 +52,9 @@ function App() {
 
     return () => {
       lenis.destroy();
+      lenisRef.current = null;
     };
-  }, []); // Re-running this might re-create lenis, better keep it empty dep.
+  }, []); // Empty dependency mainly because we want single instantiation
 
   return (
     <main className="w-full bg-bg-primary min-h-screen">
