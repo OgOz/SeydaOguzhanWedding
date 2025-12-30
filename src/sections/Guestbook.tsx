@@ -137,7 +137,10 @@ export const Guestbook: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [visibleCount, setVisibleCount] = useState(6);
 
-    const headerText = "Bu hikâye yıllardır ‘biz’di. Şimdi resmileşiyor.";
+    const headerLines = [
+        "Bu hikâye yıllardır ‘biz’di.",
+        "Şimdi resmileşiyor."
+    ];
 
     useGSAP(() => {
         const tl = gsap.timeline({
@@ -153,13 +156,20 @@ export const Guestbook: React.FC = () => {
             duration: 1,
             ease: "power3.out"
         })
-            .from(".typewriter-char", {
+            .from(".typewriter-line-0 .typewriter-char", {
                 opacity: 0,
                 y: 5,
                 stagger: 0.03,
                 duration: 0.05,
                 ease: "none"
-            }, "-=0.5");
+            }, "-=0.5")
+            .from(".typewriter-line-1 .typewriter-char", {
+                opacity: 0,
+                y: 5,
+                stagger: 0.03,
+                duration: 0.05,
+                ease: "none"
+            }, "+=0.1"); // Slight pause between lines
 
     }, { scope: containerRef });
 
@@ -296,13 +306,17 @@ export const Guestbook: React.FC = () => {
                         <h2 className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium">Anı Duvarı</h2>
                     </div>
 
-                    <p className="text-stone-600 max-w-lg mx-auto text-lg md:text-xl font-serif italic leading-relaxed h-[60px] md:h-[40px] flex items-center justify-center flex-wrap">
-                        {headerText.split("").map((char, index) => (
-                            <span key={index} className="typewriter-char inline-block whitespace-pre">
-                                {char}
-                            </span>
+                    <div className="text-stone-600 max-w-lg mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px]">
+                        {headerLines.map((line, lineIndex) => (
+                            <p key={lineIndex} className={`typewriter-line-${lineIndex} whitespace-nowrap`}>
+                                {line.split("").map((char, charIndex) => (
+                                    <span key={charIndex} className="typewriter-char inline-block whitespace-pre">
+                                        {char}
+                                    </span>
+                                ))}
+                            </p>
                         ))}
-                    </p>
+                    </div>
                 </div>
 
                 <div className="mb-16 flex flex-col items-center relative z-20">
