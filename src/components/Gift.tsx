@@ -34,9 +34,12 @@ export const Gift: React.FC = () => {
         "Zahmet etmeyin ✋",
         "En büyük hediye sizsiniz ✨",
         "Gerçekten düşünmeniz yeter 🌸",
-        "Güzel gönlünüz sağ olsun! 😇",
-        "Madem öyle, tamam 🎁",
-        "Çok teşekkür ederiz 🫶🏻",
+        "Lütfen, gerek yok! 🙈",
+        "Şaka yapmıyoruz! 😄",
+        "İlla da katkı mı diyorsunuz? 🤔",
+        "Tamam pes ediyoruz... Şaka! 🏃‍♂️",
+        "Bakın gerçekten kaçıyorum! 💨",
+        "Peki peki, kazandınız 🎁",
     ];
 
     const [message, setMessage] = useState(messages[0]);
