@@ -77,7 +77,7 @@ export const Gift: React.FC = () => {
             await controls.start({
                 x,
                 y,
-                transition: { duration: 0.1, type: "spring", stiffness: 400, damping: 10 }
+                transition: { type: "spring", stiffness: 600, damping: 25, mass: 0.8 }
             });
         } else {
             // Caught Logic (Final Step)
