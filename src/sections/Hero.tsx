@@ -3,14 +3,15 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { HoldButton } from '../components/HoldButton';
 
-
-// ... imports
-
 export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
+        // Force scroll to top on mount to ensure lock works expectedly
+        window.history.scrollRestoration = 'manual';
+        window.scrollTo(0, 0);
+
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
         // 1. Initial Set
@@ -74,13 +75,14 @@ export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
             force3D: true
         });
 
-        // Hold Hint Pulse
+        // Hold Hint Pulse - Enhanced for visibility
         gsap.to(".hold-hint", {
-            opacity: 0.6,
-            scale: 0.95,
+            opacity: 1,
+            scale: 1.1,
+            textShadow: "0 0 20px rgba(244, 63, 94, 0.5)",
             yoyo: true,
             repeat: -1,
-            duration: 1.5,
+            duration: 0.8,
             ease: "sine.inOut"
         });
 
@@ -149,7 +151,7 @@ export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
                 </div>
 
                 {/* Hold Hint */}
-                <div className="hero-reveal hold-hint text-rose-400 text-xs md:text-sm font-medium tracking-[0.2em] uppercase opacity-0 mb-8 md:mb-10">
+                <div className="hero-reveal hold-hint text-rose-500 text-sm md:text-base font-bold tracking-[0.25em] uppercase opacity-0 mb-8 md:mb-12 drop-shadow-sm">
                     Kalbe Basılı Tutun
                 </div>
 
@@ -172,6 +174,6 @@ export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
 
             </div>
 
-        </div >
+        </div>
     );
 };

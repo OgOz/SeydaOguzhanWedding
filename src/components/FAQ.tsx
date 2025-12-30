@@ -67,6 +67,9 @@ export const FAQ: React.FC = () => {
     }, { scope: containerRef });
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
+        // Disable on mobile/tablet to avoid conflict with scroll scrub
+        if (window.innerWidth <= 768) return;
+
         const card = cardsRef.current[index];
         if (!card) return;
 
@@ -96,6 +99,8 @@ export const FAQ: React.FC = () => {
     };
 
     const handleMouseLeave = (index: number) => {
+        if (window.innerWidth <= 768) return;
+
         const card = cardsRef.current[index];
         if (!card) return;
 
@@ -117,6 +122,8 @@ export const FAQ: React.FC = () => {
     };
 
     const handleMouseEnter = (index: number) => {
+        if (window.innerWidth <= 768) return;
+
         // Dim siblings
         const others = cardsRef.current.filter((_, i) => i !== index && _);
         gsap.to(others, {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, useAnimation, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useHoldSound } from '../hooks/useHoldSound';
+import confetti from 'canvas-confetti';
 
 interface HoldButtonProps {
     onComplete: () => void;
@@ -22,9 +23,6 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
 
     const handleStart = async () => {
         if (isExploding) return;
-
-        // Charge sound removed
-        // playCharge();
 
         // Stop idle pulsing
         scaleControls.stop();
@@ -73,6 +71,31 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
         // Success Sound
         playSuccess();
 
+        // Confetti Explosion
+        const roseColors = ['#fda4af', '#f43f5e', '#e11d48', '#ffffff'];
+
+        const shootConfetti = (origin: { x: number, y: number }) => {
+            confetti({
+                particleCount: 40,
+                spread: 100,
+                origin: origin,
+                colors: roseColors,
+                zIndex: 10000,
+                scalar: 1.2,
+                drift: 0,
+                gravity: 1.2
+            });
+        };
+
+        // Fire from center
+        shootConfetti({ x: 0.5, y: 0.5 });
+
+        // Fire bursts from sides after slight delay
+        setTimeout(() => {
+            shootConfetti({ x: 0.3, y: 0.6 });
+            shootConfetti({ x: 0.7, y: 0.6 });
+        }, 200);
+
         // Instant hide heart
         scaleControls.start({ scale: 0, opacity: 0, transition: { duration: 0.1 } });
 
@@ -108,7 +131,6 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
 
     // Transform motion value to percentage strings for the gradient stops
     const offset1 = useTransform(fillLevel, v => `${v}%`);
-    // const offset2 = useTransform(fillLevel, v => `${v}%`); // Sharp line
 
     return (
         <>
@@ -129,19 +151,6 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
                     <svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-xl overflow-visible">
                         <defs>
                             <path id="heartPath" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-
-                            {/* Linear Gradient for Liquid Fill 
-                       x1,y1 to x2,y2 determines direction. 
-                       x1=0, x2=0 is vertical.
-                       y1=1 (bottom), y2=0 (top).
-                       
-                       Stops:
-                       stop1: pink (offset starts at 0%)
-                       stop2: white (offset starts at 0%)
-                       
-                       As offset increases to 100%:
-                       The 'pink' region grows from bottom to top.
-                   */}
                             <linearGradient id="liquidGradient" x1="0" x2="0" y1="1" y2="0">
                                 <motion.stop stopColor="#ca869d" offset={offset1} />
                                 <motion.stop stopColor="#ffffff" offset={offset1} />
@@ -157,12 +166,6 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className })
                         />
                     </svg>
                 </motion.button>
-
-                <div className="relative z-10 text-center pointer-events-none">
-                    <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-rose-500/80">
-                        Basılı Tutun
-                    </span>
-                </div>
             </div>
         </>
     );
