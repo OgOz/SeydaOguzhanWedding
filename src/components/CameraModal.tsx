@@ -286,8 +286,10 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
                         <img src={capturedMedia.url} alt="Captured" className="w-full h-full object-contain" />
                     ) : (
                         <video
+                            key={capturedMedia.url}
                             src={capturedMedia.url}
                             controls
+                            playsInline
                             className="w-full h-full object-contain"
                             autoPlay
                             loop
