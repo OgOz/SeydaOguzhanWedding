@@ -110,6 +110,7 @@ const PhotoCard: React.FC<{
                     <video
                         src={photo.url}
                         controls
+                        playsInline
                         className="w-full h-full object-cover"
                         controlsList="nodownload"
                     />
@@ -502,7 +503,7 @@ export const Guestbook: React.FC = () => {
                                         type="file"
                                         ref={fileInputRef}
                                         className="hidden"
-                                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+                                        accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
                                         onChange={handleFileSelect}
                                     />
                                 </motion.button>
