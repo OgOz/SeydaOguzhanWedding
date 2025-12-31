@@ -432,14 +432,23 @@ export const Guestbook: React.FC = () => {
                         </div>
                         <h2
                             onClick={(e) => {
-                                if (e.detail === 5) {
+                                if (e.detail === 10) {
                                     setShowLoginModal(true);
                                 }
                             }}
-                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default active:scale-95 transition-transform"
+                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default active:scale-95 transition-transform select-none"
                         >
                             Anı Duvarı
                         </h2>
+                        {isAdmin && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="absolute -top-12 right-0 left-0 mx-auto w-max px-3 py-1 bg-red-100 text-red-600 text-xs font-bold tracking-widest rounded-full uppercase border border-red-200"
+                            >
+                                Yönetici Modu Aktif
+                            </motion.div>
+                        )}
                     </div>
 
                     <div className="text-stone-600 max-w-lg mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px]">
@@ -493,7 +502,7 @@ export const Guestbook: React.FC = () => {
                                         type="file"
                                         ref={fileInputRef}
                                         className="hidden"
-                                        accept="image/*,video/mp4,video/quicktime,video/webm"
+                                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
                                         onChange={handleFileSelect}
                                     />
                                 </motion.button>
