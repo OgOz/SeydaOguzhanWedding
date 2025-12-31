@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Section } from '../components/Section';
 import { Camera, Upload, X, Loader2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -363,8 +364,8 @@ export const Guestbook: React.FC = () => {
         <Section id="guestbook" className="py-24 bg-stone-100 overflow-hidden relative">
             {/* Admin Login Modal */}
             <AnimatePresence>
-                {showLoginModal && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                {showLoginModal && createPortal(
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -387,7 +388,7 @@ export const Guestbook: React.FC = () => {
                                         type="text"
                                         value={loginUser}
                                         onChange={e => setLoginUser(e.target.value)}
-                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all"
+                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all text-base"
                                         placeholder="Kullanıcı adı"
                                     />
                                 </div>
@@ -397,7 +398,7 @@ export const Guestbook: React.FC = () => {
                                         type="password"
                                         value={loginPass}
                                         onChange={e => setLoginPass(e.target.value)}
-                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all"
+                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all text-base"
                                         placeholder="••••••••"
                                     />
                                 </div>
@@ -416,7 +417,8 @@ export const Guestbook: React.FC = () => {
                                 </button>
                             </form>
                         </motion.div>
-                    </div>
+                    </div>,
+                    document.body
                 )}
             </AnimatePresence>
 
