@@ -56,7 +56,14 @@ function App() {
       lenis.destroy();
       lenisRef.current = null;
     };
+
   }, []); // Empty dependency mainly because we want single instantiation
+
+  // Force scroll to top on refresh/load
+  useEffect(() => {
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <main className="w-full bg-bg-primary min-h-screen">

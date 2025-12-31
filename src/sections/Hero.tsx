@@ -8,10 +8,6 @@ export const Hero: React.FC<{ onUnlock?: () => void }> = ({ onUnlock }) => {
     const textRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
-        // Force scroll to top on mount to ensure lock works expectedly
-        window.history.scrollRestoration = 'manual';
-        window.scrollTo(0, 0);
-
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
         // 1. Initial Set

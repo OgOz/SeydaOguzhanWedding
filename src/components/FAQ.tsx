@@ -51,14 +51,17 @@ export const FAQ: React.FC = () => {
                 gsap.to(card, {
                     scrollTrigger: {
                         trigger: card,
-                        start: "top 120%", // Start before it enters
-                        end: "bottom -20%", // End after it leaves
-                        scrub: 1.5,
+                        start: "top 80%", // Start earlier
+                        end: "bottom 20%",
+                        scrub: 1, // Smooth scrub
+                        toggleActions: "play reverse play reverse"
                     },
-                    rotateX: -5,  // Slight nod
-                    rotateY: i % 2 === 0 ? 3 : -3, // Alternate subtle sideways tilt
-                    '--mouse-x': '90%', // Spotlight travels diagonally
+                    rotateX: -5,
+                    rotateY: i % 2 === 0 ? 3 : -3,
+                    '--mouse-x': '90%',
                     '--mouse-y': '90%',
+                    boxShadow: "0 20px 50px -12px rgba(244,63,94,0.25)", // Rose shadow
+                    borderColor: "#fda4af", // Rose-300
                     ease: "power1.inOut"
                 });
             });
