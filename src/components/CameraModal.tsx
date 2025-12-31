@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, RotateCcw, Check, RefreshCw, Zap, ZapOff, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,7 +38,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
                     facingMode: facingMode,
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
-                    aspectRatio: { ideal: 9 / 16 } // Portrait preferred
+                    aspectRatio: { ideal: 9 / 16 }
                 },
                 audio: mode === 'video'
             });
@@ -79,7 +80,6 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
         }
     };
 
-    // Switch Camera (Front/Back)
     const toggleCamera = () => {
         setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
         setTorchEnabled(false);
@@ -125,7 +125,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
         }, 'image/jpeg', 0.9);
     };
 
-    // Video Recording Logic
+    // Video Recording with Countdown
     const startRecordingWrapper = () => {
         if (countdown !== null) return;
 
@@ -146,7 +146,6 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
         if (!stream) return;
 
         chunksRef.current = [];
-        // Check supported mime types for Safari/Chrome compatibility
         const mimeType = MediaRecorder.isTypeSupported('video/mp4; codecs=avc1')
             ? 'video/mp4; codecs=avc1'
             : 'video/webm';
@@ -162,7 +161,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
             const file = new File([blob], `video-${Date.now()}.mp4`, { type: 'video/mp4' });
             const url = URL.createObjectURL(blob);
             setCapturedMedia({ url, type: 'video', file });
-            stopCamera(); // Stop stream to save battery/resources
+            stopCamera();
             if (timerRef.current) clearInterval(timerRef.current);
             setIsRecording(false);
             setTimeLeft(15);
@@ -172,7 +171,6 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
         setIsRecording(true);
         mediaRecorderRef.current = recorder;
 
-        // Timer
         let time = 15;
         timerRef.current = setInterval(() => {
             time -= 1;
@@ -219,12 +217,14 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
     const circumference = 2 * Math.PI * radius;
     const progress = ((15 - timeLeft) / 15) * circumference;
 
-    return (
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col bg-black h-[100dvh] touch-none overscroll-none"
+            className="fixed inset-0 z-[9999] flex flex-col bg-black touch-none overscroll-none"
         >
             {/* Top Bar */}
             <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-20">
@@ -274,7 +274,6 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
                 </AnimatePresence>
 
                 {!capturedMedia ? (
-                    // Live Camera View
                     <video
                         ref={videoRef}
                         autoPlay
@@ -283,7 +282,6 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
                         className={`w-full h-full object-cover transform ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
                     />
                 ) : (
-                    // Captured Preview
                     capturedMedia.type === 'photo' ? (
                         <img src={capturedMedia.url} alt="Captured" className="w-full h-full object-contain" />
                     ) : (
@@ -389,6 +387,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
                     </div>
                 )}
             </div>
-        </motion.div>
+        </motion.div>,
+        document.body
     );
 };
