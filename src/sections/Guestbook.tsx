@@ -16,6 +16,7 @@ interface Photo {
     rotation: number;
     userId?: string;
     storagePath?: string;
+    type?: 'image' | 'video'; // Added to support video uploads
 }
 
 const PhotoCard: React.FC<{
@@ -103,7 +104,16 @@ const PhotoCard: React.FC<{
             </AnimatePresence>
 
             <div className="aspect-[4/5] w-full bg-stone-100 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5">
-                <img src={photo.url} alt="Memory" className="w-full h-full object-cover" loading="lazy" />
+                {photo.type === 'video' ? (
+                    <video
+                        src={photo.url}
+                        controls
+                        className="w-full h-full object-cover"
+                        controlsList="nodownload"
+                    />
+                ) : (
+                    <img src={photo.url} alt="Memory" className="w-full h-full object-cover" loading="lazy" />
+                )}
             </div>
 
             {photo.caption && (
@@ -247,18 +257,42 @@ export const Guestbook: React.FC = () => {
         return () => unsubscribe();
     }, [visibleCount]);
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            if (file.size > 10 * 1024 * 1024) {
-                alert("Dosya boyutu çok büyük! Lütfen 10MB'dan küçük bir fotoğraf seçin.");
+
+            // 1. Size Check (100MB)
+            if (file.size > 100 * 1024 * 1024) {
+                alert("Dosya boyutu çok büyük! Lütfen 100MB'dan küçük bir dosya seçin.");
                 return;
             }
+
+            // 2. Video Duration Check
+            if (file.type.startsWith('video/')) {
+                const duration = await getVideoDuration(file);
+                if (duration > 15) {
+                    alert("Video süresi 15 saniyeden uzun olamaz.");
+                    return;
+                }
+            }
+
             setSelectedFile(file);
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
             setIsUploading(true);
         }
+    };
+
+    const getVideoDuration = (file: File): Promise<number> => {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = function () {
+                window.URL.revokeObjectURL(video.src);
+                resolve(video.duration);
+            }
+            video.src = URL.createObjectURL(file);
+        });
     };
 
     const handlePost = async () => {
@@ -278,7 +312,8 @@ export const Guestbook: React.FC = () => {
                 timestamp: serverTimestamp(),
                 rotation: Math.random() * 6 - 3,
                 userId: userId,
-                storagePath: filename
+                storagePath: filename,
+                type: selectedFile.type.startsWith('video/') ? 'video' : 'image'
             });
 
             handleCloseUpload();
@@ -414,14 +449,14 @@ export const Guestbook: React.FC = () => {
                                     <Upload size={32} />
                                 </div>
                                 <div className="text-center">
-                                    <span className="block font-serif text-xl text-stone-800 mb-1">Bir Fotoğraf Ekle</span>
-                                    <span className="text-xs text-stone-400 uppercase tracking-wider">Buraya tıklayın</span>
+                                    <span className="block font-serif text-xl text-stone-800 mb-1">Bir Anı Ekle</span>
+                                    <span className="text-xs text-stone-400 uppercase tracking-wider">Fotoğraf veya Video (Max 15sn)</span>
                                 </div>
                                 <input
                                     type="file"
                                     ref={fileInputRef}
                                     className="hidden"
-                                    accept="image/*"
+                                    accept="image/*,video/mp4,video/quicktime,video/webm"
                                     onChange={handleFileSelect}
                                 />
                             </motion.button>
@@ -442,7 +477,11 @@ export const Guestbook: React.FC = () => {
                                 </button>
 
                                 <div className="aspect-square w-full rounded-lg overflow-hidden bg-stone-100 mb-4 border border-stone-200">
-                                    {previewUrl && <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />}
+                                    {previewUrl && (
+                                        selectedFile?.type.startsWith('video/')
+                                            ? <video src={previewUrl} controls className="w-full h-full object-cover" />
+                                            : <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                    )}
                                 </div>
 
                                 <input
