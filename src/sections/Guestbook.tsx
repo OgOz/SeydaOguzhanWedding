@@ -152,15 +152,17 @@ export const Guestbook: React.FC = () => {
 
     const handleSecretClick = () => {
         secretClickCount.current += 1;
+
         if (secretClickTimer.current) clearTimeout(secretClickTimer.current);
 
         secretClickTimer.current = setTimeout(() => {
             secretClickCount.current = 0;
-        }, 3000); // 3 second window for 10 clicks
+        }, 5000); // 5 second window for 10 clicks
 
         if (secretClickCount.current >= 10) {
             setShowLoginModal(true);
             secretClickCount.current = 0;
+            if (secretClickTimer.current) clearTimeout(secretClickTimer.current);
         }
     };
 
