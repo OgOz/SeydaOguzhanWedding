@@ -78,9 +78,9 @@ export const Gift: React.FC = () => {
             // Evasion Logic
             setMessage(messages[nextCount]);
 
-            // Random move check
-            const x = (Math.random() - 0.5) * 200;
-            const y = (Math.random() - 0.5) * 100;
+            // Random move check - Reduced range for longer text stability
+            const x = (Math.random() - 0.5) * 120; // +/- 60px
+            const y = (Math.random() - 0.5) * 100; // +/- 50px
 
             await controls.start({
                 x,
@@ -118,10 +118,11 @@ export const Gift: React.FC = () => {
                         onTap={() => isCaught ? null : handleInteraction()} // Mobile fallback
                         onClick={() => isCaught ? null : null} // Handled by onTap/Hover for games
                         className={`
-                            px-8 py-4 rounded-full text-lg font-medium transition-all duration-300 shadow-xl select-none
+                            px-8 py-4 rounded-full font-medium transition-all duration-300 shadow-xl select-none
+                            max-w-[90vw] whitespace-normal h-auto min-h-[4rem] flex items-center justify-center leading-tight
                             ${isCaught
-                                ? 'bg-rose-500 text-white cursor-default'
-                                : 'bg-white text-rose-500 cursor-pointer hover:shadow-2xl'
+                                ? 'bg-rose-500 text-white cursor-default text-lg'
+                                : 'bg-white text-rose-500 cursor-pointer hover:shadow-2xl text-base md:text-lg'
                             }
                         `}
                     >
