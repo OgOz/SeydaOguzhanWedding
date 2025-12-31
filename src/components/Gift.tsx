@@ -30,25 +30,25 @@ export const Gift: React.FC = () => {
 
     // Updated playful messages sequence (15 steps)
     const messages = [
-        "Aslında sevginiz yeterli ❤️",
-        "Zahmet etmeyin ✋",
-        "Ciddiyiz, gerek yok! 🙈",
-        "En büyük hediye sizsiniz ✨",
-        "Bakın kaçıyorum! 💨",
-        "Yakalayamazsınız ki... 🤪",
-        "Hala uğraşıyor musunuz? 🤔",
-        "Tamam pes ettim... Şaka! 🏃‍♂️",
-        "Çok hızlısınız! ⚡",
-        "Tamam, tamam... Az kaldı! 🤏",
-        "Şaka şaka, yakalayamazsınız! 🎢",
-        "Son şansınız olabilir... 🎲",
-        "Beni hafife alıyorsunuz! ⚡",
-        "Neyse, kıyamadım... 🏳️",
-        "Peki peki, kazandınız 🎁",
+        "Bizim için en büyük hediye; yanımızda olmanız 🤍",
+        "Cidden söylüyoruz, başka hiçbir şeye gerek yok 🙂",
+        "Bu gün; sevgiyle, dostlukla hatırlansın istiyoruz ✨",
+        "Biz mutluyuz — sizin varlığınız bize yetiyor 🤍",
+        "Hediye konusunu dert etmeyin, keyfimize bakalım 🎉",
+        "Bakın, söz veriyoruz: kırılmayız 😄",
+        "Nazik düşünceniz bize fazlasıyla değerli 🙏",
+        "Ama biz bu günü sade tutmak istiyoruz 🌿",
+        "İnatçı olduğunuzu biliyoruz… yine de yok diyoruz 😄",
+        "Gerçekten: varlığınız bizim için en güzeli 🤍",
+        "Şimdi eğlenmeye dönelim, gerisini boş verelim 🎶",
+        "İyi ki varsınız — birlikte kutlamak yeter 🎊",
+        "Eğer içiniz rahat etmeyecekse, küçük bir katkıyı sevgiyle kabul ederiz 🤍",
+        "Ama bilin ki: bizim için en değerli hediye hâlâ sizsiniz ✨"
     ];
 
     const [message, setMessage] = useState(messages[0]);
     const [isCaught, setIsCaught] = useState(false);
+    const [isCooldown, setIsCooldown] = useState(false);
 
     const handleCopyIBAN = async () => {
         try {
@@ -61,9 +61,12 @@ export const Gift: React.FC = () => {
     };
 
     const handleInteraction = async () => {
-        if (isCaught) {
+        if (isCaught || isCooldown) {
             return;
         }
+
+        setIsCooldown(true);
+        setTimeout(() => setIsCooldown(false), 1000);
 
         const nextCount = clickCount + 1;
         setClickCount(nextCount);
