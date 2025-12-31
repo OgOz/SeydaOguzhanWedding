@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { db, storage } from '../lib/firebase';
+import { CameraModal } from '../components/CameraModal';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, deleteDoc, doc, limit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -144,7 +145,17 @@ export const Guestbook: React.FC = () => {
     const [caption, setCaption] = useState('');
     const [userId, setUserId] = useState<string>('');
     const [isAdmin, setIsAdmin] = useState(false);
+
     const [visibleCount, setVisibleCount] = useState(6);
+    const [showCamera, setShowCamera] = useState(false);
+
+    const handleCameraCapture = (file: File) => {
+        setSelectedFile(file);
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+        setIsUploading(true);
+        setShowCamera(false);
+    };
 
     const headerLines = [
         "Bu hikâye yıllardır ‘biz’di.",
@@ -434,32 +445,63 @@ export const Guestbook: React.FC = () => {
                 </div>
 
                 <div className="mb-16 flex flex-col items-center relative z-20">
+                    <AnimatePresence>
+                        {showCamera && (
+                            <CameraModal
+                                onClose={() => setShowCamera(false)}
+                                onCapture={handleCameraCapture}
+                            />
+                        )}
+                    </AnimatePresence>
+
                     <AnimatePresence mode="wait">
                         {!isUploading ? (
-                            <motion.button
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => fileInputRef.current?.click()}
-                                className="group relative flex flex-col items-center gap-4 bg-white p-8 rounded-2xl border-2 border-dashed border-rose-200 hover:border-rose-400 transition-all shadow-sm hover:shadow-md cursor-pointer"
-                            >
-                                <div className="p-4 bg-rose-50 rounded-full text-rose-500 group-hover:bg-rose-100 transition-colors">
-                                    <Upload size={32} />
-                                </div>
-                                <div className="text-center">
-                                    <span className="block font-serif text-xl text-stone-800 mb-1">Bir Anı Ekle</span>
-                                    <span className="text-xs text-stone-400 uppercase tracking-wider">Fotoğraf veya Video (Max 15sn)</span>
-                                </div>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden"
-                                    accept="image/*,video/mp4,video/quicktime,video/webm"
-                                    onChange={handleFileSelect}
-                                />
-                            </motion.button>
+                            <div className="flex flex-col md:flex-row gap-4 w-full max-w-xl mx-auto">
+                                {/* Upload Button */}
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="flex-1 group relative flex flex-col items-center gap-4 bg-white p-8 rounded-2xl border-2 border-dashed border-rose-200 hover:border-rose-400 transition-all shadow-sm hover:shadow-md cursor-pointer"
+                                >
+                                    <div className="p-4 bg-rose-50 rounded-full text-rose-500 group-hover:bg-rose-100 transition-colors">
+                                        <Upload size={32} />
+                                    </div>
+                                    <div className="text-center">
+                                        <span className="block font-serif text-lg text-stone-800 mb-1">Galeriden Seç</span>
+                                        <span className="text-xs text-stone-400 uppercase tracking-wider">Fotoğraf / Video</span>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/*,video/mp4,video/quicktime,video/webm"
+                                        onChange={handleFileSelect}
+                                    />
+                                </motion.button>
+
+                                {/* Camera Button */}
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => setShowCamera(true)}
+                                    className="flex-1 group relative flex flex-col items-center gap-4 bg-rose-500 p-8 rounded-2xl border-2 border-rose-500 hover:bg-rose-600 transition-all shadow-md hover:shadow-lg cursor-pointer text-white"
+                                >
+                                    <div className="p-4 bg-white/20 rounded-full text-white transition-colors">
+                                        <Camera size={32} />
+                                    </div>
+                                    <div className="text-center">
+                                        <span className="block font-serif text-lg mb-1">Kamerayı Aç</span>
+                                        <span className="text-xs text-white/70 uppercase tracking-wider">Anı Yakala</span>
+                                    </div>
+                                </motion.button>
+                            </div>
                         ) : (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
