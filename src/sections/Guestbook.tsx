@@ -450,6 +450,10 @@ export const Guestbook: React.FC = () => {
                             <CameraModal
                                 onClose={() => setShowCamera(false)}
                                 onCapture={handleCameraCapture}
+                                onGalleryClick={() => {
+                                    setShowCamera(false);
+                                    fileInputRef.current?.click();
+                                }}
                             />
                         )}
                     </AnimatePresence>

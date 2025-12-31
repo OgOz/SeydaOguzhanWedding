@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, RotateCcw, Check, RefreshCw } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { X, RotateCcw, Check, RefreshCw, Zap, ZapOff, Image as ImageIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CameraModalProps {
     onClose: () => void;
     onCapture: (file: File) => void;
+    onGalleryClick: () => void;
 }
 
-export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) => {
+export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, onGalleryClick }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [mode, setMode] = useState<'photo' | 'video'>('photo');
@@ -18,6 +19,11 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<any>(null);
+
+    // Optimizasyon State'leri
+    const [hasTorch, setHasTorch] = useState(false);
+    const [torchEnabled, setTorchEnabled] = useState(false);
+    const [countdown, setCountdown] = useState<number | null>(null);
 
     // Initialize Camera
     const startCamera = useCallback(async () => {
@@ -40,6 +46,16 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
             if (videoRef.current) {
                 videoRef.current.srcObject = newStream;
             }
+
+            // Torch Check
+            const track = newStream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities() as any; // Cast for TS
+            if (capabilities.torch) {
+                setHasTorch(true);
+            } else {
+                setHasTorch(false);
+            }
+
         } catch (err) {
             console.error("Camera access error:", err);
             alert("Kameraya erişilemedi. Lütfen izinlerinizi kontrol edin.");
@@ -66,6 +82,20 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
     // Switch Camera (Front/Back)
     const toggleCamera = () => {
         setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+        setTorchEnabled(false);
+    };
+
+    const toggleTorch = async () => {
+        if (!stream) return;
+        const track = stream.getVideoTracks()[0];
+        try {
+            await track.applyConstraints({
+                advanced: [{ torch: !torchEnabled }] as any
+            });
+            setTorchEnabled(!torchEnabled);
+        } catch (err) {
+            console.error("Torch error:", err);
+        }
     };
 
     // Capture Photo
@@ -96,6 +126,22 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
     };
 
     // Video Recording Logic
+    const startRecordingWrapper = () => {
+        if (countdown !== null) return;
+
+        setCountdown(3);
+        let count = 3;
+        const countdownInterval = setInterval(() => {
+            count -= 1;
+            setCountdown(count);
+            if (count === 0) {
+                clearInterval(countdownInterval);
+                setCountdown(null);
+                startRecording();
+            }
+        }, 1000);
+    };
+
     const startRecording = () => {
         if (!stream) return;
 
@@ -157,6 +203,18 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
     };
 
     // Calculate Progress Ring Dash
+    // Scroll Lock & Mobile Optimization
+    useEffect(() => {
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        document.body.style.touchAction = 'none';
+
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+        };
+    }, []);
+
     const radius = 36;
     const circumference = 2 * Math.PI * radius;
     const progress = ((15 - timeLeft) / 15) * circumference;
@@ -166,7 +224,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black z-[100] flex flex-col"
+            className="fixed inset-0 z-[100] flex flex-col bg-black h-[100dvh] touch-none overscroll-none"
         >
             {/* Top Bar */}
             <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-20">
@@ -177,18 +235,44 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
                     <X size={24} />
                 </button>
 
-                {!capturedMedia && (
-                    <button
-                        onClick={toggleCamera}
-                        className="bg-black/20 backdrop-blur-md p-2 rounded-full text-white"
-                    >
-                        <RefreshCw size={24} />
-                    </button>
-                )}
+                <div className="flex gap-4">
+                    {hasTorch && !capturedMedia && (
+                        <button
+                            onClick={toggleTorch}
+                            className={`p-2 rounded-full backdrop-blur-md transition-all ${torchEnabled ? 'bg-yellow-400 text-black' : 'bg-black/20 text-white'}`}
+                        >
+                            {torchEnabled ? <Zap size={24} fill="currentColor" /> : <ZapOff size={24} />}
+                        </button>
+                    )}
+
+                    {!capturedMedia && (
+                        <button
+                            onClick={toggleCamera}
+                            className="bg-black/20 backdrop-blur-md p-2 rounded-full text-white"
+                        >
+                            <RefreshCw size={24} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Main Content */}
             <div className="flex-1 relative bg-black overflow-hidden flex items-center justify-center">
+                {/* Countdown Overlay */}
+                <AnimatePresence>
+                    {countdown !== null && countdown > 0 && (
+                        <motion.div
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 1.5, opacity: 0 }}
+                            key={countdown}
+                            className="absolute inset-0 z-50 flex items-center justify-center"
+                        >
+                            <span className="text-9xl font-bold text-white drop-shadow-2xl">{countdown}</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {!capturedMedia ? (
                     // Live Camera View
                     <video
@@ -219,7 +303,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
                 {!capturedMedia ? (
                     <div className="flex flex-col items-center gap-6">
                         {/* Mode Switcher */}
-                        <div className="flex bg-black/30 rounded-full p-1 border border-white/10">
+                        <div className="flex bg-black/30 rounded-full p-1 border border-white/10 relative">
                             <button
                                 onClick={() => setMode('photo')}
                                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${mode === 'photo' ? 'bg-white text-black' : 'text-white'}`}
@@ -234,39 +318,54 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture }) 
                             </button>
                         </div>
 
-                        {/* Capture Button */}
-                        <div className="relative flex items-center justify-center">
-                            {mode === 'video' && isRecording && (
-                                <svg className="absolute w-24 h-24 -rotate-90 pointer-events-none">
-                                    <circle
-                                        cx="48" cy="48" r={radius}
-                                        stroke="white" strokeWidth="4"
-                                        fill="none" className="opacity-30"
-                                    />
-                                    <circle
-                                        cx="48" cy="48" r={radius}
-                                        stroke="#f43f5e" strokeWidth="4"
-                                        fill="none"
-                                        strokeDasharray={circumference}
-                                        strokeDashoffset={circumference - progress}
-                                        className="transition-all duration-1000 ease-linear"
-                                    />
-                                </svg>
-                            )}
-
+                        <div className="w-full flex items-center justify-between px-8">
+                            {/* Gallery Button (Left) */}
                             <button
-                                onClick={mode === 'photo' ? takePhoto : (isRecording ? stopRecording : startRecording)}
-                                className={`
-                                    w-16 h-16 rounded-full border-4 border-white flex items-center justify-center transition-all
-                                    ${mode === 'photo'
-                                        ? 'bg-white/20 active:bg-white'
-                                        : (isRecording ? 'bg-rose-500 scale-75' : 'bg-red-500')
-                                    }
-                                `}
+                                onClick={onGalleryClick}
+                                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/20"
                             >
-                                {mode === 'photo' && <div className="w-12 h-12 bg-white rounded-full opacity-0 active:opacity-100 transition-opacity" />}
-                                {mode === 'video' && isRecording && <div className="w-6 h-6 bg-white rounded-sm" />}
+                                <ImageIcon size={24} />
                             </button>
+
+                            {/* Capture Button (Center) */}
+                            <div className="relative flex items-center justify-center">
+                                {mode === 'video' && isRecording && (
+                                    <svg className="absolute w-24 h-24 -rotate-90 pointer-events-none">
+                                        <circle
+                                            cx="48" cy="48" r={radius}
+                                            stroke="white" strokeWidth="4"
+                                            fill="none" className="opacity-30"
+                                        />
+                                        <circle
+                                            cx="48" cy="48" r={radius}
+                                            stroke="#f43f5e" strokeWidth="4"
+                                            fill="none"
+                                            strokeDasharray={circumference}
+                                            strokeDashoffset={circumference - progress}
+                                            className="transition-all duration-1000 ease-linear"
+                                        />
+                                    </svg>
+                                )}
+
+                                <button
+                                    onClick={mode === 'photo' ? takePhoto : (isRecording ? stopRecording : startRecordingWrapper)}
+                                    disabled={countdown !== null}
+                                    className={`
+                                        w-16 h-16 rounded-full border-4 border-white flex items-center justify-center transition-all
+                                        ${mode === 'photo'
+                                            ? 'bg-white/20 active:bg-white'
+                                            : (isRecording ? 'bg-rose-500 scale-75' : 'bg-red-500')
+                                        }
+                                        ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}
+                                    `}
+                                >
+                                    {mode === 'photo' && <div className="w-12 h-12 bg-white rounded-full opacity-0 active:opacity-100 transition-opacity" />}
+                                    {mode === 'video' && isRecording && <div className="w-6 h-6 bg-white rounded-sm" />}
+                                </button>
+                            </div>
+
+                            {/* Spacer (Right) to balance layout */}
+                            <div className="w-12" />
                         </div>
                     </div>
                 ) : (
