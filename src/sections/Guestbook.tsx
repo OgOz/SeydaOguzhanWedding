@@ -425,12 +425,21 @@ export const Guestbook: React.FC = () => {
             <div ref={containerRef} className="max-w-6xl mx-auto px-6">
 
                 <div className="text-center mb-16 px-4">
-                    <div className="retro-title-content">
+                    <div className="retro-title-content select-none">
                         <div className="flex items-center justify-center gap-2 text-rose-500 font-bold tracking-[0.2em] uppercase mb-4">
                             <Camera size={20} />
                             <span>SİZDEN KARELER</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium">Anı Duvarı</h2>
+                        <h2
+                            onClick={(e) => {
+                                if (e.detail === 5) {
+                                    setShowLoginModal(true);
+                                }
+                            }}
+                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default active:scale-95 transition-transform"
+                        >
+                            Anı Duvarı
+                        </h2>
                     </div>
 
                     <div className="text-stone-600 max-w-lg mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px]">
