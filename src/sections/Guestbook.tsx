@@ -172,6 +172,11 @@ export const Guestbook: React.FC = () => {
 
     }, { scope: containerRef });
 
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [loginUser, setLoginUser] = useState('');
+    const [loginPass, setLoginPass] = useState('');
+    const [loginError, setLoginError] = useState(false);
+
     // Initialize User ID & Check Admin Status
     useEffect(() => {
         let storedId = localStorage.getItem('wedding_guest_id');
@@ -181,21 +186,37 @@ export const Guestbook: React.FC = () => {
         }
         setUserId(storedId);
 
-        const params = new URLSearchParams(window.location.search);
-        const adminParam = params.get('admin');
+        // Check if already authenticated
         const storedAdmin = localStorage.getItem('wedding_admin_auth');
-
-        const ADMIN_KEY = import.meta.env.VITE_ADMIN_PASSWORD || 'seydaoguzhan2026';
-
-        if (adminParam === ADMIN_KEY || storedAdmin === 'true') {
+        if (storedAdmin === 'true') {
             setIsAdmin(true);
-            localStorage.setItem('wedding_admin_auth', 'true');
-            if (adminParam) {
+        } else {
+            // Check for login trigger in URL
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('admin')) {
+                setShowLoginModal(true);
+                // Clean URL
                 const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.pushState({ path: newUrl }, '', newUrl);
             }
         }
     }, []);
+
+    const handleAdminLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        const ENV_USER = import.meta.env.VITE_ADMIN_USERNAME;
+        const ENV_PASS = import.meta.env.VITE_ADMIN_PASSWORD;
+
+        if (loginUser === ENV_USER && loginPass === ENV_PASS) {
+            setIsAdmin(true);
+            localStorage.setItem('wedding_admin_auth', 'true');
+            setShowLoginModal(false);
+            setLoginError(false);
+        } else {
+            setLoginError(true);
+            // Shake effect logic could go here
+        }
+    };
 
     // Fetch Photos
     useEffect(() => {
@@ -293,7 +314,66 @@ export const Guestbook: React.FC = () => {
     }
 
     return (
-        <Section id="guestbook" className="py-24 bg-stone-100 overflow-hidden">
+        <Section id="guestbook" className="py-24 bg-stone-100 overflow-hidden relative">
+            {/* Admin Login Modal */}
+            <AnimatePresence>
+                {showLoginModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            onClick={() => setShowLoginModal(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm relative z-10 overflow-hidden"
+                        >
+                            <h3 className="text-2xl font-serif text-rose-950 mb-6 text-center">Yönetici Girişi</h3>
+
+                            <form onSubmit={handleAdminLogin} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1">Kullanıcı Adı</label>
+                                    <input
+                                        type="text"
+                                        value={loginUser}
+                                        onChange={e => setLoginUser(e.target.value)}
+                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all"
+                                        placeholder="Kullanıcı adı"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1">Şifre</label>
+                                    <input
+                                        type="password"
+                                        value={loginPass}
+                                        onChange={e => setLoginPass(e.target.value)}
+                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+
+                                {loginError && (
+                                    <div className="text-red-500 text-sm font-medium text-center bg-red-50 py-2 rounded-lg">
+                                        Hatalı kullanıcı adı veya şifre.
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    className="w-full bg-rose-500 text-white font-bold py-3.5 rounded-xl hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200 mt-2"
+                                >
+                                    Giriş Yap
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             <div ref={containerRef} className="max-w-6xl mx-auto px-6">
 
                 <div className="text-center mb-16 px-4">
