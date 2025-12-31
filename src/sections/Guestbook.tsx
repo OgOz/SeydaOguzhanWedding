@@ -147,6 +147,22 @@ export const Guestbook: React.FC = () => {
     const [caption, setCaption] = useState('');
     const [userId, setUserId] = useState<string>('');
     const [isAdmin, setIsAdmin] = useState(false);
+    const secretClickCount = useRef(0);
+    const secretClickTimer = useRef<any>(null);
+
+    const handleSecretClick = () => {
+        secretClickCount.current += 1;
+        if (secretClickTimer.current) clearTimeout(secretClickTimer.current);
+
+        secretClickTimer.current = setTimeout(() => {
+            secretClickCount.current = 0;
+        }, 3000); // 3 second window for 10 clicks
+
+        if (secretClickCount.current >= 10) {
+            setShowLoginModal(true);
+            secretClickCount.current = 0;
+        }
+    };
 
     const [visibleCount, setVisibleCount] = useState(6);
     const [showCamera, setShowCamera] = useState(false);
@@ -432,24 +448,23 @@ export const Guestbook: React.FC = () => {
                             <span>SİZDEN KARELER</span>
                         </div>
                         <h2
-                            onClick={(e) => {
-                                if (e.detail === 10) {
-                                    setShowLoginModal(true);
-                                }
-                            }}
-                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default active:scale-95 transition-transform select-none"
+                            onClick={handleSecretClick}
+                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default active:scale-95 transition-transform select-none relative"
                         >
                             Anı Duvarı
+                            <AnimatePresence>
+                                {isAdmin && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        className="absolute -top-8 left-1/2 -translate-x-1/2 w-max px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold tracking-widest rounded-full uppercase border border-red-200 shadow-sm"
+                                    >
+                                        Yönetici Modu Aktif
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </h2>
-                        {isAdmin && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="absolute -top-12 right-0 left-0 mx-auto w-max px-3 py-1 bg-red-100 text-red-600 text-xs font-bold tracking-widest rounded-full uppercase border border-red-200"
-                            >
-                                Yönetici Modu Aktif
-                            </motion.div>
-                        )}
                     </div>
 
                     <div className="text-stone-600 max-w-lg mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px]">
