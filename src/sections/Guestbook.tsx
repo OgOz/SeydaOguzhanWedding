@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Section } from '../components/Section';
-import { Camera, Upload, X, Loader2, Trash2 } from 'lucide-react';
+import { Camera, Upload, X, Loader2, Trash2, Play, Pause } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -28,7 +28,22 @@ const PhotoCard: React.FC<{
     onDelete: (photo: Photo) => void;
 }> = ({ photo, userId, onDelete, isAdmin }) => {
     const [timeLeft, setTimeLeft] = useState<number>(0);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const isOwner = photo.userId === userId;
+
+    const togglePlay = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!videoRef.current) return;
+
+        if (videoRef.current.paused) {
+            videoRef.current.play();
+            setIsPlaying(true);
+        } else {
+            videoRef.current.pause();
+            setIsPlaying(false);
+        }
+    };
 
     useEffect(() => {
         if (!isOwner || !photo.timestamp) return;
@@ -105,21 +120,36 @@ const PhotoCard: React.FC<{
                 )}
             </AnimatePresence>
 
-            <div className="aspect-[4/5] w-full bg-stone-50 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5 flex items-center justify-center">
+            <div className="aspect-[4/5] w-full bg-stone-50 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5 flex items-center justify-center relative">
                 {photo.type === 'video' ? (
-                    <video
-                        key={photo.url}
-                        controls
-                        playsInline
-                        muted
-                        loop
-                        preload="auto"
-                        className="w-full h-full object-contain bg-stone-900"
-                        controlsList="nodownload"
-                    >
-                        <source src={photo.url} type={photo.mimeType || 'video/mp4'} />
-                        Tarayıcınız bu videoyu desteklemiyor.
-                    </video>
+                    <>
+                        <video
+                            ref={videoRef}
+                            key={photo.url}
+                            playsInline
+                            muted
+                            autoPlay
+                            loop
+                            preload="auto"
+                            className="w-full h-full object-contain bg-stone-900"
+                        >
+                            <source src={photo.url} type={photo.mimeType || 'video/mp4'} />
+                            Tarayıcınız bu videoyu desteklemiyor.
+                        </video>
+
+                        {/* Custom Play/Pause Button */}
+                        <motion.button
+                            initial={{ opacity: 0 }}
+                            whileHover={{ opacity: 1 }}
+                            animate={{ opacity: isPlaying ? 0 : 1 }}
+                            onClick={togglePlay}
+                            className="absolute inset-0 flex items-center justify-center bg-black/20 group/play"
+                        >
+                            <div className="w-16 h-16 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transform group-hover/play:scale-110 transition-transform">
+                                {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
+                            </div>
+                        </motion.button>
+                    </>
                 ) : (
                     <img src={photo.url} alt="Memory" className="w-full h-full object-contain" loading="lazy" />
                 )}
