@@ -12,6 +12,11 @@ import { AdminLogin } from './components/AdminLogin';
 import { useState, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
+// Prevent browser from restoring scroll position on refresh
+if (typeof window !== 'undefined') {
+  window.history.scrollRestoration = 'manual';
+}
+
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(true);
@@ -77,12 +82,17 @@ function App() {
 
   }, []); // Empty dependency mainly because we want single instantiation
 
-  // Force scroll to top on refresh/load
+  // Force scroll to top on mount
   useEffect(() => {
-    window.history.scrollRestoration = 'manual';
-    if (currentPath !== '/admin-og') {
+    // Immediate reset
+    window.scrollTo(0, 0);
+
+    // Backup reset for mobile/slower loads
+    const timer = setTimeout(() => {
       window.scrollTo(0, 0);
-    }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   if (currentPath === '/admin-og') {
