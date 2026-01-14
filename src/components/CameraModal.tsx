@@ -148,14 +148,15 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
         chunksRef.current = [];
         const mimeType = mode === 'video' ? (
             MediaRecorder.isTypeSupported('video/mp4; codecs=avc1') ? 'video/mp4; codecs=avc1' :
-                MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' :
+                MediaRecorder.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') ? 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' :
                     MediaRecorder.isTypeSupported('video/webm; codecs=h264') ? 'video/webm; codecs=h264' :
-                        'video/webm'
+                        MediaRecorder.isTypeSupported('video/webm; codecs=vp8') ? 'video/webm; codecs=vp8' :
+                            'video/webm'
         ) : '';
 
         const recorder = new MediaRecorder(stream, {
             mimeType: mimeType || undefined,
-            videoBitsPerSecond: 2500000 // 2.5 Mbps for good quality
+            videoBitsPerSecond: 1500000 // 1.5 Mbps is stable and high-quality for 15s clips
         });
 
         recorder.ondataavailable = (e) => {
@@ -163,10 +164,12 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
         };
 
         recorder.onstop = () => {
-            const finalType = recorder.mimeType.includes('video/mp4') ? 'video/mp4' : 'video/webm';
-            const blob = new Blob(chunksRef.current, { type: finalType });
-            const extension = finalType === 'video/mp4' ? 'mp4' : 'webm';
-            const file = new File([blob], `video-${Date.now()}.${extension}`, { type: finalType });
+            // Standardize MIME type for file creation
+            const actualType = recorder.mimeType.split(';')[0] || 'video/mp4';
+            const blob = new Blob(chunksRef.current, { type: actualType });
+            const ext = actualType.includes('mp4') ? 'mp4' : 'webm';
+
+            const file = new File([blob], `video-${Date.now()}.${ext}`, { type: actualType });
             const url = URL.createObjectURL(blob);
             setCapturedMedia({ url, type: 'video', file });
             stopCamera();

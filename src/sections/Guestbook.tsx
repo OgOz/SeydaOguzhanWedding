@@ -18,6 +18,7 @@ interface Photo {
     userId?: string;
     storagePath?: string;
     type?: 'image' | 'video'; // Added to support video uploads
+    mimeType?: string; // Explicit MIME type for better browser compatibility
 }
 
 const PhotoCard: React.FC<{
@@ -107,15 +108,18 @@ const PhotoCard: React.FC<{
             <div className="aspect-[4/5] w-full bg-stone-50 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5 flex items-center justify-center">
                 {photo.type === 'video' ? (
                     <video
-                        src={photo.url}
+                        key={photo.url}
                         controls
                         playsInline
                         muted
                         loop
-                        preload="metadata"
+                        preload="auto"
                         className="w-full h-full object-contain bg-stone-900"
                         controlsList="nodownload"
-                    />
+                    >
+                        <source src={photo.url} type={photo.mimeType || 'video/mp4'} />
+                        Tarayıcınız bu videoyu desteklemiyor.
+                    </video>
                 ) : (
                     <img src={photo.url} alt="Memory" className="w-full h-full object-contain" loading="lazy" />
                 )}
@@ -227,6 +231,8 @@ export const Guestbook: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) 
                     rotation: data.rotation,
                     userId: data.userId,
                     storagePath: data.storagePath,
+                    type: data.type || 'image',
+                    mimeType: data.mimeType,
                     timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(),
                 } as Photo;
             });
@@ -294,7 +300,8 @@ export const Guestbook: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) 
                 rotation: Math.random() * 6 - 3,
                 userId: userId,
                 storagePath: filename,
-                type: selectedFile.type.startsWith('video/') ? 'video' : 'image'
+                type: selectedFile.type.startsWith('video/') ? 'video' : 'image',
+                mimeType: selectedFile.type
             });
 
             handleCloseUpload();
