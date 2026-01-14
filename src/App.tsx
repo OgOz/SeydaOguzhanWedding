@@ -98,6 +98,11 @@ function App() {
     );
   }
 
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    localStorage.removeItem('wedding_admin_auth');
+  };
+
   return (
     <main className="w-full bg-bg-primary min-h-screen">
       <AnimatePresence mode='wait'>
@@ -106,7 +111,7 @@ function App() {
 
       <Hero onUnlock={() => setIsLocked(false)} />
       <Details />
-      <Guestbook isAdmin={isAdmin} />
+      <Guestbook isAdmin={isAdmin} onAdminLogout={handleAdminLogout} />
       <FAQ />
       <Gift />
       <Footer />

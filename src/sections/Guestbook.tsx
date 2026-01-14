@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Section } from '../components/Section';
-import { Camera, Upload, X, Loader2, Trash2, Play, Pause } from 'lucide-react';
+import { Camera, Upload, X, Loader2, Trash2, Play, Pause, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -170,7 +170,10 @@ const PhotoCard: React.FC<{
     );
 };
 
-export const Guestbook: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) => {
+export const Guestbook: React.FC<{
+    isAdmin?: boolean;
+    onAdminLogout?: () => void;
+}> = ({ isAdmin = false, onAdminLogout }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -384,20 +387,23 @@ export const Guestbook: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) 
                             Anı Duvarı
                             <AnimatePresence>
                                 {isAdmin && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                        className="absolute -top-8 left-1/2 -translate-x-1/2 w-max px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold tracking-widest rounded-full uppercase border border-red-200 shadow-sm"
+                                    <motion.button
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        onClick={onAdminLogout}
+                                        className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-1.5 bg-red-50 text-red-600 text-[10px] font-bold tracking-widest rounded-full uppercase border border-red-200 shadow-sm hover:bg-red-100 hover:scale-105 transition-all group/admin"
+                                        title="Admin Modunu Kapat"
                                     >
-                                        Yönetici Modu Aktif
-                                    </motion.div>
+                                        <span className="relative">Yönetici Modu Aktif</span>
+                                        <LogOut size={12} className="group-hover/admin:translate-x-0.5 transition-transform" />
+                                    </motion.button>
                                 )}
                             </AnimatePresence>
                         </h2>
                     </div>
 
-                    <div className="text-stone-600 max-w-lg mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px]">
+                    <div className="text-stone-600 max-w-2xl mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px]">
                         {headerLines.map((line, lineIndex) => (
                             <p key={lineIndex} className={`typewriter-line-${lineIndex} whitespace-nowrap`}>
                                 {line.split("").map((char, charIndex) => (
@@ -524,7 +530,7 @@ export const Guestbook: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) 
                     </AnimatePresence>
                 </div>
 
-                <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+                <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 md:gap-10 space-y-6 md:space-y-10 max-w-7xl mx-auto">
                     <AnimatePresence>
                         {photos.map((photo) => (
                             <PhotoCard
@@ -538,7 +544,7 @@ export const Guestbook: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) 
                     </AnimatePresence>
 
                     {photos.length === 0 && (
-                        <div className="col-span-full py-12 text-center text-stone-400 font-serif italic">
+                        <div className="col-span-full py-24 text-center text-stone-400 font-serif italic">
                             Henüz fotoğraf yok. İlk anıyı sen ekle! ✨
                         </div>
                     )}
