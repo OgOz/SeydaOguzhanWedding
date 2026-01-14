@@ -27,6 +27,7 @@ const PhotoCard: React.FC<{
     isAdmin: boolean;
     onDelete: (photo: Photo) => void;
 }> = ({ photo, userId, onDelete, isAdmin }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState(true);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,6 +67,11 @@ const PhotoCard: React.FC<{
         return () => clearInterval(timer);
     }, [photo.timestamp, isOwner]);
 
+    const isLongCaption = photo.caption && photo.caption.length > 80;
+    const displayCaption = isLongCaption && !isExpanded
+        ? photo.caption!.substring(0, 80) + '...'
+        : photo.caption;
+
     return (
         <motion.div
             layout
@@ -74,7 +80,7 @@ const PhotoCard: React.FC<{
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.4 }}
             style={{ rotate: photo.rotation }}
-            className="bg-white/80 backdrop-blur-md p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(244,63,94,0.25)] hover:-translate-y-2 transition-all duration-300 w-full max-w-[320px] mx-auto relative group break-inside-avoid mb-8 border border-white/50 rounded-xl"
+            className="bg-white/80 backdrop-blur-md p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(244,63,94,0.25)] hover:-translate-y-2 transition-all duration-300 w-full max-w-[320px] mx-auto relative group border border-white/50 rounded-xl"
         >
             {/* Pins Removed for Modern Look */}
 
@@ -156,8 +162,19 @@ const PhotoCard: React.FC<{
             </div>
 
             {photo.caption && (
-                <div className="text-center font-script text-stone-600 text-xl leading-tight px-2 pt-1 break-words">
-                    {photo.caption}
+                <div
+                    className="text-center text-stone-700 text-lg md:text-xl leading-relaxed px-2 pt-2 break-words transition-all duration-300"
+                    style={{ fontFamily: "'Courgette', system-ui" }}
+                >
+                    {displayCaption}
+                    {isLongCaption && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                            className="inline-block ml-1 text-rose-500 hover:text-rose-600 font-sans text-xs font-bold uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-full transition-colors"
+                        >
+                            {isExpanded ? 'Gizle' : 'Devamını Gör'}
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -530,7 +547,7 @@ export const Guestbook: React.FC<{
                     </AnimatePresence>
                 </div>
 
-                <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 md:gap-10 space-y-6 md:space-y-10 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 md:gap-x-10 gap-y-12 md:gap-y-16 max-w-7xl mx-auto items-start">
                     <AnimatePresence>
                         {photos.map((photo) => (
                             <PhotoCard
