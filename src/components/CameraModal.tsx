@@ -146,19 +146,27 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
         if (!stream) return;
 
         chunksRef.current = [];
-        const mimeType = MediaRecorder.isTypeSupported('video/mp4; codecs=avc1')
-            ? 'video/mp4; codecs=avc1'
-            : 'video/webm';
+        const mimeType = mode === 'video' ? (
+            MediaRecorder.isTypeSupported('video/mp4; codecs=avc1') ? 'video/mp4; codecs=avc1' :
+                MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' :
+                    MediaRecorder.isTypeSupported('video/webm; codecs=h264') ? 'video/webm; codecs=h264' :
+                        'video/webm'
+        ) : '';
 
-        const recorder = new MediaRecorder(stream, { mimeType });
+        const recorder = new MediaRecorder(stream, {
+            mimeType: mimeType || undefined,
+            videoBitsPerSecond: 2500000 // 2.5 Mbps for good quality
+        });
 
         recorder.ondataavailable = (e) => {
             if (e.data.size > 0) chunksRef.current.push(e.data);
         };
 
         recorder.onstop = () => {
-            const blob = new Blob(chunksRef.current, { type: 'video/mp4' });
-            const file = new File([blob], `video-${Date.now()}.mp4`, { type: 'video/mp4' });
+            const finalType = recorder.mimeType.includes('video/mp4') ? 'video/mp4' : 'video/webm';
+            const blob = new Blob(chunksRef.current, { type: finalType });
+            const extension = finalType === 'video/mp4' ? 'mp4' : 'webm';
+            const file = new File([blob], `video-${Date.now()}.${extension}`, { type: finalType });
             const url = URL.createObjectURL(blob);
             setCapturedMedia({ url, type: 'video', file });
             stopCamera();

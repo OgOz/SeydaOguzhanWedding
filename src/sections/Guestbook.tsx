@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Section } from '../components/Section';
 import { Camera, Upload, X, Loader2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -105,17 +104,20 @@ const PhotoCard: React.FC<{
                 )}
             </AnimatePresence>
 
-            <div className="aspect-[4/5] w-full bg-stone-100 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5">
+            <div className="aspect-[4/5] w-full bg-stone-50 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5 flex items-center justify-center">
                 {photo.type === 'video' ? (
                     <video
                         src={photo.url}
                         controls
                         playsInline
-                        className="w-full h-full object-cover"
+                        muted
+                        loop
+                        preload="metadata"
+                        className="w-full h-full object-contain bg-stone-900"
                         controlsList="nodownload"
                     />
                 ) : (
-                    <img src={photo.url} alt="Memory" className="w-full h-full object-cover" loading="lazy" />
+                    <img src={photo.url} alt="Memory" className="w-full h-full object-contain" loading="lazy" />
                 )}
             </div>
 
@@ -134,7 +136,7 @@ const PhotoCard: React.FC<{
     );
 };
 
-export const Guestbook: React.FC = () => {
+export const Guestbook: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -146,25 +148,7 @@ export const Guestbook: React.FC = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [caption, setCaption] = useState('');
     const [userId, setUserId] = useState<string>('');
-    const [isAdmin, setIsAdmin] = useState(false);
-    const secretClickCount = useRef(0);
-    const secretClickTimer = useRef<any>(null);
 
-    const handleSecretClick = () => {
-        secretClickCount.current += 1;
-
-        if (secretClickTimer.current) clearTimeout(secretClickTimer.current);
-
-        secretClickTimer.current = setTimeout(() => {
-            secretClickCount.current = 0;
-        }, 5000); // 5 second window for 10 clicks
-
-        if (secretClickCount.current >= 10) {
-            setShowLoginModal(true);
-            secretClickCount.current = 0;
-            if (secretClickTimer.current) clearTimeout(secretClickTimer.current);
-        }
-    };
 
     const [visibleCount, setVisibleCount] = useState(6);
     const [showCamera, setShowCamera] = useState(false);
@@ -213,12 +197,9 @@ export const Guestbook: React.FC = () => {
 
     }, { scope: containerRef });
 
-    const [showLoginModal, setShowLoginModal] = useState(false);
-    const [loginUser, setLoginUser] = useState('');
-    const [loginPass, setLoginPass] = useState('');
-    const [loginError, setLoginError] = useState(false);
 
-    // Initialize User ID & Check Admin Status
+
+    // Initialize User ID
     useEffect(() => {
         let storedId = localStorage.getItem('wedding_guest_id');
         if (!storedId) {
@@ -226,38 +207,7 @@ export const Guestbook: React.FC = () => {
             localStorage.setItem('wedding_guest_id', storedId);
         }
         setUserId(storedId);
-
-        // Check if already authenticated
-        const storedAdmin = localStorage.getItem('wedding_admin_auth');
-        if (storedAdmin === 'true') {
-            setIsAdmin(true);
-        } else {
-            // Check for login trigger in URL
-            const params = new URLSearchParams(window.location.search);
-            if (params.has('admin')) {
-                setShowLoginModal(true);
-                // Clean URL
-                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                window.history.pushState({ path: newUrl }, '', newUrl);
-            }
-        }
     }, []);
-
-    const handleAdminLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        const ENV_USER = import.meta.env.VITE_ADMIN_USERNAME;
-        const ENV_PASS = import.meta.env.VITE_ADMIN_PASSWORD;
-
-        if (loginUser === ENV_USER && loginPass === ENV_PASS) {
-            setIsAdmin(true);
-            localStorage.setItem('wedding_admin_auth', 'true');
-            setShowLoginModal(false);
-            setLoginError(false);
-        } else {
-            setLoginError(true);
-            // Shake effect logic could go here
-        }
-    };
 
     // Fetch Photos
     useEffect(() => {
@@ -381,65 +331,7 @@ export const Guestbook: React.FC = () => {
 
     return (
         <Section id="guestbook" className="py-24 bg-stone-100 overflow-hidden relative">
-            {/* Admin Login Modal */}
-            <AnimatePresence>
-                {showLoginModal && createPortal(
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                            onClick={() => setShowLoginModal(false)}
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm relative z-10 overflow-hidden"
-                        >
-                            <h3 className="text-2xl font-serif text-rose-950 mb-6 text-center">Yönetici Girişi</h3>
 
-                            <form onSubmit={handleAdminLogin} className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1">Kullanıcı Adı</label>
-                                    <input
-                                        type="text"
-                                        value={loginUser}
-                                        onChange={e => setLoginUser(e.target.value)}
-                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all text-base"
-                                        placeholder="Kullanıcı adı"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1">Şifre</label>
-                                    <input
-                                        type="password"
-                                        value={loginPass}
-                                        onChange={e => setLoginPass(e.target.value)}
-                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all text-base"
-                                        placeholder="••••••••"
-                                    />
-                                </div>
-
-                                {loginError && (
-                                    <div className="text-red-500 text-sm font-medium text-center bg-red-50 py-2 rounded-lg">
-                                        Hatalı kullanıcı adı veya şifre.
-                                    </div>
-                                )}
-
-                                <button
-                                    type="submit"
-                                    className="w-full bg-rose-500 text-white font-bold py-3.5 rounded-xl hover:bg-rose-600 transition-colors shadow-lg shadow-rose-200 mt-2"
-                                >
-                                    Giriş Yap
-                                </button>
-                            </form>
-                        </motion.div>
-                    </div>,
-                    document.body
-                )}
-            </AnimatePresence>
 
             <div ref={containerRef} className="max-w-6xl mx-auto px-6">
 
@@ -450,8 +342,7 @@ export const Guestbook: React.FC = () => {
                             <span>SİZDEN KARELER</span>
                         </div>
                         <h2
-                            onClick={handleSecretClick}
-                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default active:scale-95 transition-transform select-none relative"
+                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default select-none relative"
                         >
                             Anı Duvarı
                             <AnimatePresence>
@@ -560,11 +451,11 @@ export const Guestbook: React.FC = () => {
                                     <X size={20} />
                                 </button>
 
-                                <div className="aspect-square w-full rounded-lg overflow-hidden bg-stone-100 mb-4 border border-stone-200">
+                                <div className="aspect-square w-full rounded-lg overflow-hidden bg-stone-100 mb-4 border border-stone-200 flex items-center justify-center">
                                     {previewUrl && (
                                         selectedFile?.type.startsWith('video/')
-                                            ? <video src={previewUrl} controls className="w-full h-full object-cover" />
-                                            : <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                            ? <video src={previewUrl} controls playsInline muted className="w-full h-full object-contain bg-stone-900" />
+                                            : <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" />
                                     )}
                                 </div>
 

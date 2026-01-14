@@ -8,17 +8,35 @@ import { Footer } from './components/Footer';
 import Lenis from '@studio-freight/lenis';
 
 import { Preloader } from './components/Preloader';
+import { AdminLogin } from './components/AdminLogin';
 import { useState, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return localStorage.getItem('wedding_admin_auth') === 'true';
+  });
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const lenisRef = useRef<Lenis | null>(null);
+
+  // Update path on popstate (back/forward)
+  useEffect(() => {
+    const handlePopState = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigate = (path: string) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+    window.scrollTo(0, 0);
+  };
 
   // Scroll Lock Logic
   useEffect(() => {
-    if (isLoading || isLocked) {
+    if (isLoading || isLocked || currentPath === '/admin-og') {
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none'; // Strict mobile lock
       if (lenisRef.current) lenisRef.current.stop();
@@ -27,7 +45,7 @@ function App() {
       document.body.style.touchAction = '';
       if (lenisRef.current) lenisRef.current.start();
     }
-  }, [isLoading, isLocked]);
+  }, [isLoading, isLocked, currentPath]);
 
   // Smooth Scroll Setup
   useEffect(() => {
@@ -62,8 +80,23 @@ function App() {
   // Force scroll to top on refresh/load
   useEffect(() => {
     window.history.scrollRestoration = 'manual';
-    window.scrollTo(0, 0);
+    if (currentPath !== '/admin-og') {
+      window.scrollTo(0, 0);
+    }
   }, []);
+
+  if (currentPath === '/admin-og') {
+    return (
+      <AdminLogin
+        onLogin={() => {
+          setIsAdmin(true);
+          localStorage.setItem('wedding_admin_auth', 'true');
+          navigate('/');
+        }}
+        onBack={() => navigate('/')}
+      />
+    );
+  }
 
   return (
     <main className="w-full bg-bg-primary min-h-screen">
@@ -73,7 +106,7 @@ function App() {
 
       <Hero onUnlock={() => setIsLocked(false)} />
       <Details />
-      <Guestbook />
+      <Guestbook isAdmin={isAdmin} />
       <FAQ />
       <Gift />
       <Footer />
