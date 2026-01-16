@@ -7,7 +7,6 @@ import gsap from 'gsap';
 
 export const Details: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [copied, setCopied] = useState(false);
 
     useGSAP(() => {
         gsap.from(".detail-card", {
@@ -22,12 +21,6 @@ export const Details: React.FC = () => {
             ease: "power3.out"
         });
     }, { scope: containerRef });
-
-    const handleCopyAddress = () => {
-        navigator.clipboard.writeText("Ataköy 7-8-9-10, 34158 Bakırköy/İstanbul");
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
 
     const handleCalendar = () => {
         const event = {
@@ -108,56 +101,23 @@ END:VCALENDAR`;
 
                             <div className="w-full h-px bg-stone-50 mb-12" />
 
-                            <div className="flex flex-wrap gap-x-12 gap-y-6">
-                                <a
-                                    href="https://maps.app.goo.gl/TvXrBjn2bMpvadt66"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-4 text-rose-400 hover:text-rose-500 transition-all group/link"
-                                >
-                                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 transition-colors border border-rose-100/50 group-hover/link:bg-rose-100/50">
-                                        <MapPin size={18} />
-                                    </div>
-                                    <span className="text-sm font-semibold border-b border-rose-200 group-hover/link:border-rose-400 py-0.5">Haritada Yol Tarifi</span>
-                                </a>
-
-                                <button
-                                    onClick={handleCopyAddress}
-                                    className="flex items-center gap-4 text-stone-400 hover:text-stone-600 transition-all group/btn"
-                                >
-                                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-stone-50 group-hover/btn:bg-stone-100 transition-colors border border-stone-100/50 relative">
-                                        <AnimatePresence mode="wait">
-                                            {copied ? (
-                                                <motion.div
-                                                    key="check"
-                                                    initial={{ opacity: 0, scale: 0.5 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    exit={{ opacity: 0, scale: 0.5 }}
-                                                >
-                                                    <Check size={18} className="text-green-500" />
-                                                </motion.div>
-                                            ) : (
-                                                <motion.div
-                                                    key="copy"
-                                                    initial={{ opacity: 0, scale: 0.5 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    exit={{ opacity: 0, scale: 0.5 }}
-                                                >
-                                                    <Copy size={18} />
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                    <span className="text-sm font-medium border-b border-stone-200 group-hover/btn:border-stone-400 transition-all py-0.5">
-                                        {copied ? 'Kopyalandı!' : 'Adresi Kopyala'}
-                                    </span>
-                                </button>
-                            </div>
+                            <a
+                                href="https://maps.app.goo.gl/TvXrBjn2bMpvadt66"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-4 text-rose-400 hover:text-rose-500 transition-all group/link"
+                            >
+                                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 transition-colors border border-rose-100/50 group-hover/link:bg-rose-100/50">
+                                    <MapPin size={18} />
+                                </div>
+                                <span className="text-sm font-semibold border-b border-rose-200 group-hover/link:border-rose-400 py-0.5">Haritada Yol Tarifi</span>
+                            </a>
                         </div>
                     </div>
-
                 </div>
+
             </div>
-        </Section>
+        </div>
+        </Section >
     );
 };
