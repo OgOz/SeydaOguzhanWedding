@@ -101,9 +101,17 @@ END:VCALENDAR`;
 
                             <div className="w-full h-px bg-stone-50 mb-12" />
 
-                            {/* The MapPin icon and its surrounding anchor tag were removed as per the instruction's implied change. */}
-                            {/* The instruction's provided snippet was malformed, so I've removed the entire map link section to align with the intent of removing unused icons and fixing syntax. */}
-                            {/* If MapPin was intended to be kept, please provide a clearer instruction. */}
+                            <a
+                                href="https://maps.app.goo.gl/TvXrBjn2bMpvadt66"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-4 text-rose-400 hover:text-rose-500 transition-all group/link w-fit"
+                            >
+                                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 transition-colors border border-rose-100/50 group-hover/link:bg-rose-100/50">
+                                    <MapPin size={18} />
+                                </div>
+                                <span className="text-sm font-semibold border-b border-rose-200 group-hover/link:border-rose-400 py-0.5">Haritada Yol Tarifi</span>
+                            </a>
                         </div>
                     </div>
                 </div>
