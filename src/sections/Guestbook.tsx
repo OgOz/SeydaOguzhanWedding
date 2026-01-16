@@ -6,8 +6,8 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { db, storage } from '../lib/firebase';
 import { CameraModal } from '../components/CameraModal';
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, deleteDoc, doc, limit } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, doc, limit, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface Photo {
     id: string;
@@ -19,6 +19,7 @@ interface Photo {
     storagePath?: string;
     type?: 'image' | 'video'; // Added to support video uploads
     mimeType?: string; // Explicit MIME type for better browser compatibility
+    isHidden?: boolean; // Soft delete flag
 }
 
 const PhotoCard: React.FC<{
@@ -283,9 +284,10 @@ export const Guestbook: React.FC<{
                     storagePath: data.storagePath,
                     type: data.type || 'image',
                     mimeType: data.mimeType,
+                    isHidden: data.isHidden || false,
                     timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(),
                 } as Photo;
-            });
+            }).filter(photo => !photo.isHidden);
             setPhotos(fetchedPhotos);
         }, (error) => {
             console.error("Realtime listener error:", error);
@@ -367,13 +369,20 @@ export const Guestbook: React.FC<{
         if (!confirm("Bu anıyı silmek istiyor musun? İşlem geri alınamaz.")) return;
 
         try {
-            await deleteDoc(doc(db, 'guestbook', photo.id));
+            // Soft Delete: Just mark as hidden in Firestore
+            await updateDoc(doc(db, 'guestbook', photo.id), {
+                isHidden: true
+            });
+
+            // We NO LONGER delete from storage to preserve the files as requested.
+            /*
             if (photo.storagePath) {
                 const imageRef = ref(storage, photo.storagePath);
                 await deleteObject(imageRef).catch(e => console.warn("Storage delete warn:", e));
             }
+            */
         } catch (error) {
-            console.error("Error deleting photo:", error);
+            console.error("Error soft-deleting photo:", error);
             alert("Silinirken bir hata oluştu.");
         }
     };
