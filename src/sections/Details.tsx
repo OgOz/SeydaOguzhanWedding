@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { Section } from '../components/Section';
 import { Calendar, MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
