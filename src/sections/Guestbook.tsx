@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Section } from '../components/Section';
-import { Camera, Upload, X, Loader2, Trash2, Play, Pause, LogOut } from 'lucide-react';
+import { Camera, Upload, X, Loader2, Trash2, Play, Pause, LogOut, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -31,6 +31,7 @@ const PhotoCard: React.FC<{
     const [isExpanded, setIsExpanded] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState(true);
+    const [isMuted, setIsMuted] = useState(true);
     const videoRef = useRef<HTMLVideoElement>(null);
     const isOwner = photo.userId === userId;
 
@@ -45,6 +46,13 @@ const PhotoCard: React.FC<{
             videoRef.current.pause();
             setIsPlaying(false);
         }
+    };
+
+    const toggleMute = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!videoRef.current) return;
+        videoRef.current.muted = !videoRef.current.muted;
+        setIsMuted(videoRef.current.muted);
     };
 
     useEffect(() => {
@@ -144,18 +152,30 @@ const PhotoCard: React.FC<{
                             Tarayıcınız bu videoyu desteklemiyor.
                         </video>
 
-                        {/* Custom Play/Pause Button */}
-                        <motion.button
+                        {/* Custom Controls Overlay */}
+                        <motion.div
                             initial={{ opacity: 0 }}
                             whileHover={{ opacity: 1 }}
                             animate={{ opacity: isPlaying ? 0 : 1 }}
-                            onClick={togglePlay}
-                            className="absolute inset-0 flex items-center justify-center bg-black/20 group/play"
+                            className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 group/controls"
                         >
-                            <div className="w-16 h-16 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transform group-hover/play:scale-110 transition-transform">
+                            {/* Play/Pause Button */}
+                            <button
+                                onClick={togglePlay}
+                                className="w-16 h-16 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transform hover:scale-110 transition-transform mb-4"
+                            >
                                 {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
-                            </div>
-                        </motion.button>
+                            </button>
+
+                            {/* Mute/Unmute Button */}
+                            <button
+                                onClick={toggleMute}
+                                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transform hover:scale-110 transition-transform"
+                                title={isMuted ? "Sesi Aç" : "Sesi Kapat"}
+                            >
+                                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                            </button>
+                        </motion.div>
                     </>
                 ) : (
                     <img src={photo.url} alt="Memory" className="w-full h-full object-contain" loading="lazy" />
