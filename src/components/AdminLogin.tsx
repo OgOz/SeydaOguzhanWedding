@@ -12,16 +12,32 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBack }) => {
     const [loginPass, setLoginPass] = useState('');
     const [loginError, setLoginError] = useState(false);
 
-    const handleAdminLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        const ENV_USER = import.meta.env.VITE_ADMIN_USERNAME;
-        const ENV_PASS = import.meta.env.VITE_ADMIN_PASSWORD;
+    const [isLoading, setIsLoading] = useState(false);
 
-        if (loginUser === ENV_USER && loginPass === ENV_PASS) {
-            onLogin();
-            setLoginError(false);
-        } else {
+    const handleAdminLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setLoginError(false);
+
+        try {
+            const response = await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: loginUser, password: loginPass }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                onLogin();
+            } else {
+                setLoginError(true);
+            }
+        } catch (error) {
+            console.error('Login failed:', error);
             setLoginError(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -82,9 +98,10 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBack }) => {
 
                     <button
                         type="submit"
-                        className="w-full bg-rose-500 text-white font-bold py-5 rounded-2xl hover:bg-rose-600 transition-all shadow-xl shadow-rose-200 active:scale-[0.98] text-lg mt-4"
+                        disabled={isLoading}
+                        className="w-full bg-rose-500 text-white font-bold py-5 rounded-2xl hover:bg-rose-600 transition-all shadow-xl shadow-rose-200 active:scale-[0.98] text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Giriş Yap
+                        {isLoading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
                     </button>
                 </form>
             </motion.div>
