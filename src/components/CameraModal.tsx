@@ -7,9 +7,10 @@ interface CameraModalProps {
     onClose: () => void;
     onCapture: (file: File) => void;
     onGalleryClick: () => void;
+    isAfterParty?: boolean;
 }
 
-export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, onGalleryClick }) => {
+export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, onGalleryClick, isAfterParty }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [mode, setMode] = useState<'photo' | 'video'>('photo');
@@ -230,6 +231,8 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
 
     if (typeof document === 'undefined') return null;
 
+    const accentColor = isAfterParty ? "#a855f7" : "#f43f5e";
+
     return createPortal(
         <motion.div
             initial={{ opacity: 0 }}
@@ -349,7 +352,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
                                         />
                                         <circle
                                             cx="48" cy="48" r={radius}
-                                            stroke="#f43f5e" strokeWidth="4"
+                                            stroke={accentColor} strokeWidth="4"
                                             fill="none"
                                             strokeDasharray={circumference}
                                             strokeDashoffset={circumference - progress}
@@ -365,10 +368,11 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
                                         w-16 h-16 rounded-full border-4 border-white flex items-center justify-center transition-all
                                         ${mode === 'photo'
                                             ? 'bg-white/20 active:bg-white'
-                                            : (isRecording ? 'bg-rose-500 scale-75' : 'bg-red-500')
+                                            : (isRecording ? `bg-${isAfterParty ? 'purple' : 'rose'}-500 scale-75` : 'bg-red-500')
                                         }
                                         ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}
                                     `}
+                                    style={mode === 'video' && isRecording ? { backgroundColor: accentColor } : {}}
                                 >
                                     {mode === 'photo' && <div className="w-12 h-12 bg-white rounded-full opacity-0 active:opacity-100 transition-opacity" />}
                                     {mode === 'video' && isRecording && <div className="w-6 h-6 bg-white rounded-sm" />}
@@ -392,7 +396,7 @@ export const CameraModal: React.FC<CameraModalProps> = ({ onClose, onCapture, on
 
                         <button
                             onClick={handleConfirm}
-                            className="bg-rose-500 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:bg-rose-600"
+                            className={`text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg ${isAfterParty ? 'bg-purple-600 hover:bg-purple-700' : 'bg-rose-500 hover:bg-rose-600'}`}
                         >
                             <Check size={18} />
                             Kullan

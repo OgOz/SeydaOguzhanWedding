@@ -4,13 +4,14 @@ import gsap from 'gsap';
 
 interface PreloaderProps {
     onComplete: () => void;
+    isAfterParty?: boolean;
 }
 
-export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
+export const Preloader: React.FC<PreloaderProps> = ({ onComplete, isAfterParty }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLParagraphElement>(null);
 
-    const text = "Birlikte, nihayet...";
+    const text = isAfterParty ? "Gece başlıyor..." : "Birlikte, nihayet...";
 
     // Disable scroll while preloader is active
     React.useLayoutEffect(() => {
@@ -31,8 +32,6 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
             }
         });
 
-        // 1. Text Reveal (Typewriter)
-        // 1. Cinematic Reveal
         tl.fromTo(chars,
             {
                 opacity: 0,
@@ -52,10 +51,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
                 ease: "power3.out"
             }
         )
-            // 2. Hold for a moment
             .to({}, { duration: 0.8 })
-
-            // 3. Fade out text
             .to(chars, {
                 opacity: 0,
                 y: -20,
@@ -64,8 +60,6 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
                 duration: 0.6,
                 ease: "power2.in"
             })
-
-            // 4. Slide up curtain / Fade out container
             .to(containerRef.current, {
                 yPercent: -100,
                 duration: 0.8,
@@ -77,7 +71,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
     return (
         <div
             ref={containerRef}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-rose-50 text-rose-950"
+            className={`fixed inset-0 z-[100] flex items-center justify-center transition-colors duration-700 ${isAfterParty ? 'bg-[#0a0508] text-purple-100' : 'bg-rose-50 text-rose-950'}`}
         >
             <p ref={textRef} className="text-4xl md:text-6xl font-serif italic tracking-wide relative p-4" style={{ perspective: "1000px" }}>
                 {text.split('').map((char, index) => (

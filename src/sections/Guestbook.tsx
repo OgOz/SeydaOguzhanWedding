@@ -27,7 +27,8 @@ const PhotoCard: React.FC<{
     userId: string;
     isAdmin: boolean;
     onDelete: (photo: Photo) => void;
-}> = ({ photo, userId, onDelete, isAdmin }) => {
+    isAfterParty?: boolean;
+}> = ({ photo, userId, onDelete, isAdmin, isAfterParty }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -89,10 +90,11 @@ const PhotoCard: React.FC<{
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.4 }}
             style={{ rotate: photo.rotation }}
-            className="bg-white/80 backdrop-blur-md p-4 pb-12 shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(244,63,94,0.25)] hover:-translate-y-2 transition-all duration-300 w-full max-w-[320px] mx-auto relative group border border-white/50 rounded-xl"
+            className={`${isAfterParty
+                ? 'bg-white/5 border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_50px_-12px_rgba(168,85,247,0.2)]'
+                : 'bg-white/80 border-white/50 shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(244,63,94,0.25)]'} 
+                backdrop-blur-md p-4 pb-12 hover:-translate-y-2 transition-all duration-300 w-full max-w-[320px] mx-auto relative group border rounded-xl`}
         >
-            {/* Pins Removed for Modern Look */}
-
             {isAdmin && (
                 <button
                     onClick={(e) => { e.stopPropagation(); onDelete(photo); }}
@@ -110,15 +112,15 @@ const PhotoCard: React.FC<{
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         onClick={(e) => { e.stopPropagation(); onDelete(photo); }}
-                        className="absolute -right-2 -top-4 flex items-center gap-1.5 bg-white pl-2 pr-3 py-1.5 rounded-full shadow-lg text-rose-500 border border-rose-100 z-20 hover:bg-rose-50 transition-colors"
+                        className={`absolute -right-2 -top-4 flex items-center gap-1.5 pl-2 pr-3 py-1.5 rounded-full shadow-lg z-20 transition-colors ${isAfterParty ? 'bg-[#1a1a1a] text-purple-400 border-purple-500/30 hover:bg-purple-900/20' : 'bg-white text-rose-500 border-rose-100 hover:bg-rose-50'}`}
                         title="Silmek için kalan süre"
                     >
                         <div className="relative flex items-center justify-center w-5 h-5">
                             <svg className="absolute inset-0 -rotate-90" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="#fecdd3" strokeWidth="3" fill="none" />
+                                <circle cx="12" cy="12" r="10" stroke={isAfterParty ? "#3b0764" : "#fecdd3"} strokeWidth="3" fill="none" />
                                 <motion.circle
                                     cx="12" cy="12" r="10"
-                                    stroke="#f43f5e"
+                                    stroke={isAfterParty ? "#a855f7" : "#f43f5e"}
                                     strokeWidth="3"
                                     fill="none"
                                     initial={{ pathLength: 1 }}
@@ -126,7 +128,7 @@ const PhotoCard: React.FC<{
                                     transition={{ duration: 1, ease: "linear" }}
                                 />
                             </svg>
-                            <Trash2 size={10} className="relative z-10 text-rose-600" />
+                            <Trash2 size={10} className={`relative z-10 ${isAfterParty ? 'text-purple-400' : 'text-rose-600'}`} />
                         </div>
                         <span className="text-xs font-semibold tabular-nums leading-none">
                             Sil ({timeLeft})
@@ -135,7 +137,7 @@ const PhotoCard: React.FC<{
                 )}
             </AnimatePresence>
 
-            <div className="aspect-[4/5] w-full bg-stone-50 mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5 flex items-center justify-center relative">
+            <div className={`aspect-[4/5] w-full mb-4 overflow-hidden grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 ring-1 ring-black/5 flex items-center justify-center relative ${isAfterParty ? 'bg-[#0f0f0f]' : 'bg-stone-50'}`}>
                 {photo.type === 'video' ? (
                     <>
                         <video
@@ -152,14 +154,12 @@ const PhotoCard: React.FC<{
                             Tarayıcınız bu videoyu desteklemiyor.
                         </video>
 
-                        {/* Custom Controls Overlay */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             whileHover={{ opacity: 1 }}
                             animate={{ opacity: isPlaying ? 0 : 1 }}
                             className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 group/controls"
                         >
-                            {/* Play/Pause Button */}
                             <button
                                 onClick={togglePlay}
                                 className="w-16 h-16 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transform hover:scale-110 transition-transform mb-4"
@@ -167,7 +167,6 @@ const PhotoCard: React.FC<{
                                 {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
                             </button>
 
-                            {/* Mute/Unmute Button */}
                             <button
                                 onClick={toggleMute}
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transform hover:scale-110 transition-transform"
@@ -184,14 +183,14 @@ const PhotoCard: React.FC<{
 
             {photo.caption && (
                 <div
-                    className="text-center text-stone-700 text-lg md:text-xl leading-relaxed px-2 pt-2 break-words transition-all duration-300"
+                    className={`text-center text-lg md:text-xl leading-relaxed px-2 pt-2 break-words transition-all duration-300 ${isAfterParty ? 'text-purple-100' : 'text-stone-700'}`}
                     style={{ fontFamily: "'Courgette', system-ui" }}
                 >
                     {displayCaption}
                     {isLongCaption && (
                         <button
                             onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-                            className="inline-block ml-1 text-rose-500 hover:text-rose-600 font-sans text-xs font-bold uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-full transition-colors"
+                            className={`inline-block ml-1 font-sans text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full transition-colors ${isAfterParty ? 'text-purple-400 bg-purple-950/50 hover:text-purple-300' : 'text-rose-500 bg-rose-50 hover:text-rose-600'}`}
                         >
                             {isExpanded ? 'Gizle' : 'Devamını Gör'}
                         </button>
@@ -200,7 +199,7 @@ const PhotoCard: React.FC<{
             )}
 
             {photo.timestamp && (
-                <div className="absolute bottom-2 right-4 text-[10px] text-stone-300 font-mono">
+                <div className={`absolute bottom-2 right-4 text-[10px] font-mono ${isAfterParty ? 'text-purple-300/30' : 'text-stone-300'}`}>
                     {photo.timestamp.toLocaleDateString('tr-TR')} {photo.timestamp.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                 </div>
             )}
@@ -211,7 +210,8 @@ const PhotoCard: React.FC<{
 export const Guestbook: React.FC<{
     isAdmin?: boolean;
     onAdminLogout?: () => void;
-}> = ({ isAdmin = false, onAdminLogout }) => {
+    isAfterParty?: boolean;
+}> = ({ isAdmin = false, onAdminLogout, isAfterParty }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -236,10 +236,13 @@ export const Guestbook: React.FC<{
         setShowCamera(false);
     };
 
-    const headerLines = [
-        "Bu hikâye yıllardır ‘biz’di.",
-        "Şimdi resmileşiyor."
-    ];
+    const headerLines = isAfterParty
+        ? ["Kutlama asıl şimdi başlıyor.", "Gece bizim!"]
+        : ["Bu hikâye yıllardır ‘biz’di.", "Şimdi resmileşiyor."];
+
+    const titleColors = isAfterParty
+        ? { icon: "text-purple-400", sub: "text-purple-300", accent: "text-purple-100" }
+        : { icon: "text-rose-500", sub: "text-stone-800", accent: "text-stone-600" };
 
     useGSAP(() => {
         const tl = gsap.timeline({
@@ -393,14 +396,6 @@ export const Guestbook: React.FC<{
             await updateDoc(doc(db, 'guestbook', photo.id), {
                 isHidden: true
             });
-
-            // We NO LONGER delete from storage to preserve the files as requested.
-            /*
-            if (photo.storagePath) {
-                const imageRef = ref(storage, photo.storagePath);
-                await deleteObject(imageRef).catch(e => console.warn("Storage delete warn:", e));
-            }
-            */
         } catch (error) {
             console.error("Error soft-deleting photo:", error);
             alert("Silinirken bir hata oluştu.");
@@ -416,19 +411,19 @@ export const Guestbook: React.FC<{
     }
 
     return (
-        <Section id="guestbook" className="py-24 bg-stone-100 overflow-hidden relative">
+        <Section id="guestbook" className={`py-24 overflow-hidden relative transition-colors duration-700 ${isAfterParty ? 'bg-[#0a0508]' : 'bg-stone-100'}`}>
 
 
             <div ref={containerRef} className="max-w-6xl mx-auto px-6">
 
                 <div className="text-center mb-16 px-4">
                     <div className="retro-title-content select-none">
-                        <div className="flex items-center justify-center gap-2 text-rose-500 font-bold tracking-[0.2em] uppercase mb-4">
+                        <div className={`flex items-center justify-center gap-2 font-bold tracking-[0.2em] uppercase mb-4 ${titleColors.icon}`}>
                             <Camera size={20} />
                             <span>SİZDEN KARELER</span>
                         </div>
                         <h2
-                            className="text-4xl md:text-5xl font-serif text-stone-800 mb-6 font-medium cursor-default select-none relative"
+                            className={`text-4xl md:text-5xl font-serif mb-6 font-medium cursor-default select-none relative ${isAfterParty ? 'text-white' : 'text-stone-800'}`}
                         >
                             Anı Duvarı
                             <AnimatePresence>
@@ -438,7 +433,7 @@ export const Guestbook: React.FC<{
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         onClick={onAdminLogout}
-                                        className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-1.5 bg-red-50 text-red-600 text-[10px] font-bold tracking-widest rounded-full uppercase border border-red-200 shadow-sm hover:bg-red-100 hover:scale-105 transition-all group/admin"
+                                        className={`absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold tracking-widest rounded-full uppercase border shadow-sm transition-all group/admin ${isAfterParty ? 'bg-purple-950/40 text-purple-300 border-purple-500/30' : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:scale-105'}`}
                                         title="Admin Modunu Kapat"
                                     >
                                         <span className="relative">Yönetici Modu Aktif</span>
@@ -449,7 +444,7 @@ export const Guestbook: React.FC<{
                         </h2>
                     </div>
 
-                    <div className="text-stone-600 max-w-2xl mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px]">
+                    <div className={`max-w-2xl mx-auto text-lg md:text-xl font-serif italic leading-relaxed flex flex-col items-center gap-1 min-h-[60px] ${isAfterParty ? 'text-purple-100/70' : 'text-stone-600'}`}>
                         {headerLines.map((line, lineIndex) => (
                             <p key={lineIndex} className={`typewriter-line-${lineIndex} whitespace-nowrap`}>
                                 {line.split("").map((char, charIndex) => (
@@ -466,6 +461,7 @@ export const Guestbook: React.FC<{
                     <AnimatePresence>
                         {showCamera && (
                             <CameraModal
+                                isAfterParty={isAfterParty}
                                 onClose={() => setShowCamera(false)}
                                 onCapture={handleCameraCapture}
                                 onGalleryClick={() => {
@@ -479,7 +475,6 @@ export const Guestbook: React.FC<{
                     <AnimatePresence mode="wait">
                         {!isUploading ? (
                             <div className="flex flex-col md:flex-row gap-4 w-full max-w-xl mx-auto">
-                                {/* Upload Button */}
                                 <motion.button
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -487,14 +482,14 @@ export const Guestbook: React.FC<{
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="flex-1 group relative flex flex-col items-center gap-4 bg-white p-8 rounded-2xl border-2 border-dashed border-rose-200 hover:border-rose-400 transition-all shadow-sm hover:shadow-md cursor-pointer"
+                                    className={`flex-1 group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-dashed transition-all shadow-sm hover:shadow-md cursor-pointer ${isAfterParty ? 'bg-purple-950/10 border-purple-500/20 hover:border-purple-500/50' : 'bg-white border-rose-200 hover:border-rose-400'}`}
                                 >
-                                    <div className="p-4 bg-rose-50 rounded-full text-rose-500 group-hover:bg-rose-100 transition-colors">
+                                    <div className={`p-4 rounded-full transition-colors ${isAfterParty ? 'bg-purple-900/40 text-purple-400 group-hover:bg-purple-800/50' : 'bg-rose-50 text-rose-500 group-hover:bg-rose-100'}`}>
                                         <Upload size={32} />
                                     </div>
                                     <div className="text-center">
-                                        <span className="block font-serif text-lg text-stone-800 mb-1">Galeriden Seç</span>
-                                        <span className="text-xs text-stone-400 uppercase tracking-wider">Fotoğraf / Video</span>
+                                        <span className={`block font-serif text-lg mb-1 ${isAfterParty ? 'text-purple-100' : 'text-stone-800'}`}>Galeriden Seç</span>
+                                        <span className={`text-xs uppercase tracking-wider ${isAfterParty ? 'text-purple-400/60' : 'text-stone-400'}`}>Fotoğraf / Video</span>
                                     </div>
                                     <input
                                         type="file"
@@ -505,7 +500,6 @@ export const Guestbook: React.FC<{
                                     />
                                 </motion.button>
 
-                                {/* Camera Button */}
                                 <motion.button
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -513,7 +507,7 @@ export const Guestbook: React.FC<{
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setShowCamera(true)}
-                                    className="flex-1 group relative flex flex-col items-center gap-4 bg-rose-500 p-8 rounded-2xl border-2 border-rose-500 hover:bg-rose-600 transition-all shadow-md hover:shadow-lg cursor-pointer text-white"
+                                    className={`flex-1 group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 transition-all shadow-md hover:shadow-lg cursor-pointer text-white ${isAfterParty ? 'bg-purple-600 border-purple-500 hover:bg-purple-700' : 'bg-rose-500 border-rose-500 hover:bg-rose-600'}`}
                                 >
                                     <div className="p-4 bg-white/20 rounded-full text-white transition-colors">
                                         <Camera size={32} />
@@ -529,18 +523,18 @@ export const Guestbook: React.FC<{
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
-                                className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm border border-stone-100 relative"
+                                className={`p-6 rounded-2xl shadow-xl w-full max-w-sm border relative ${isAfterParty ? 'bg-[#1a1a1a] border-purple-500/20' : 'bg-white border-stone-100'}`}
                             >
                                 <button
                                     onClick={handleCloseUpload}
                                     disabled={isSubmitting}
-                                    className="absolute -top-3 -right-3 p-2 bg-white text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-full shadow-lg border border-stone-100 transition-all z-20"
+                                    className={`absolute -top-3 -right-3 p-2 rounded-full shadow-lg border transition-all z-20 ${isAfterParty ? 'bg-[#2a2a2a] text-purple-300 border-purple-500/20 hover:text-red-400' : 'bg-white text-stone-400 hover:text-red-500 hover:bg-red-50 border-stone-100'}`}
                                     title="İptal"
                                 >
                                     <X size={20} />
                                 </button>
 
-                                <div className="aspect-square w-full rounded-lg overflow-hidden bg-stone-100 mb-4 border border-stone-200 flex items-center justify-center">
+                                <div className={`aspect-square w-full rounded-lg overflow-hidden mb-4 border flex items-center justify-center ${isAfterParty ? 'bg-black border-purple-500/20' : 'bg-stone-100 border-stone-200'}`}>
                                     {previewUrl && (
                                         selectedFile?.type.startsWith('video/')
                                             ? <video src={previewUrl} controls playsInline muted className="w-full h-full object-contain bg-stone-900" />
@@ -554,13 +548,13 @@ export const Guestbook: React.FC<{
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value)}
                                     disabled={isSubmitting}
-                                    className="w-full px-4 py-3 bg-stone-50 rounded-xl mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 disabled:opacity-50"
+                                    className={`w-full px-4 py-3 rounded-xl mb-4 text-sm focus:outline-none focus:ring-2 disabled:opacity-50 transition-all ${isAfterParty ? 'bg-purple-900/20 border border-purple-500/20 text-white focus:ring-purple-400/30' : 'bg-stone-50 border border-stone-100 focus:ring-rose-200'}`}
                                 />
 
                                 <button
                                     onClick={handlePost}
                                     disabled={isSubmitting}
-                                    className="w-full py-3 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-colors flex items-center justify-center gap-2 disabled:bg-rose-300 disabled:cursor-not-allowed"
+                                    className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed ${isAfterParty ? 'bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-800/50' : 'bg-rose-500 text-white hover:bg-rose-600 disabled:bg-rose-300'}`}
                                 >
                                     {isSubmitting ? (
                                         <>
@@ -585,12 +579,13 @@ export const Guestbook: React.FC<{
                                 userId={userId}
                                 isAdmin={isAdmin}
                                 onDelete={handleDelete}
+                                isAfterParty={isAfterParty}
                             />
                         ))}
                     </AnimatePresence>
 
                     {photos.length === 0 && (
-                        <div className="col-span-full py-24 text-center text-stone-400 font-serif italic">
+                        <div className={`col-span-full py-24 text-center font-serif italic ${isAfterParty ? 'text-purple-300/40' : 'text-stone-400'}`}>
                             Henüz fotoğraf yok. İlk anıyı sen ekle! ✨
                         </div>
                     )}
@@ -600,7 +595,7 @@ export const Guestbook: React.FC<{
                     <div className="flex justify-center mt-12">
                         <button
                             onClick={() => setVisibleCount(prev => prev + 6)}
-                            className="bg-white px-8 py-3 rounded-full text-stone-600 font-serif shadow-sm border border-stone-200 hover:border-rose-300 hover:text-rose-500 hover:shadow-md transition-all active:scale-95"
+                            className={`px-8 py-3 rounded-full font-serif shadow-sm border transition-all active:scale-95 ${isAfterParty ? 'bg-purple-950/20 text-purple-300 border-purple-500/20 hover:border-purple-400 hover:bg-purple-900/30' : 'bg-white text-stone-600 border-stone-200 hover:border-rose-300 hover:text-rose-500'}`}
                         >
                             Daha Fazla Göster
                         </button>

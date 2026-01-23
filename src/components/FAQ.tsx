@@ -6,7 +6,11 @@ import { content } from '../content';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const FAQ: React.FC = () => {
+interface FAQProps {
+    isAfterParty?: boolean;
+}
+
+export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -16,61 +20,50 @@ export const FAQ: React.FC = () => {
         // Initial Staggered Entrance
         gsap.fromTo(cards,
             {
-                y: 150,
+                y: 100,
                 opacity: 0,
-                rotateX: 15,
-                transformPerspective: 1000
+                rotateX: 10,
             },
             {
                 y: 0,
                 opacity: 1,
                 rotateX: 0,
-                stagger: 0.15,
-                duration: 1.4,
+                stagger: 0.1,
+                duration: 1.2,
                 ease: "power3.out",
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top 80%",
+                    start: "top 75%",
                 }
             }
         );
 
-        // Mobile: Scroll-Driven Interaction (Auto-Tilt & Shine)
+        // Mobile: Scroll-Driven Interaction
         const mm = gsap.matchMedia();
         mm.add("(max-width: 768px)", () => {
-            cards.forEach((card, i) => {
+            cards.forEach((card) => {
                 if (!card) return;
 
-                // Set initial spotlight for mobile
-                gsap.set(card, {
-                    '--mouse-x': '10%',
-                    '--mouse-y': '10%'
-                });
+                const numberFill = card.querySelector('[data-number-fill="true"]');
 
-                // Scrub animation: As you scroll past, the card tilts and shines
-                gsap.to(card, {
-                    scrollTrigger: {
-                        trigger: card,
-                        start: "top 80%", // Start earlier
-                        end: "bottom 20%",
-                        scrub: 1, // Smooth scrub
-                        toggleActions: "play reverse play reverse"
-                    },
-                    rotateX: -5,
-                    rotateY: i % 2 === 0 ? 3 : -3,
-                    '--mouse-x': '90%',
-                    '--mouse-y': '90%',
-                    boxShadow: "0 20px 50px -12px rgba(244,63,94,0.25)", // Rose shadow
-                    borderColor: "#fda4af", // Rose-300
-                    ease: "power1.inOut"
-                });
+                if (numberFill) {
+                    gsap.to(numberFill, {
+                        backgroundPosition: "0% 0%", // Moves the gradient up to fill
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top 85%",
+                            end: "center 45%",
+                            scrub: 1,
+                        },
+                        ease: "none"
+                    });
+                }
             });
         });
 
     }, { scope: containerRef });
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
-        // Disable on mobile/tablet to avoid conflict with scroll scrub
         if (window.innerWidth <= 768) return;
 
         const card = cardsRef.current[index];
@@ -80,25 +73,24 @@ export const FAQ: React.FC = () => {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
+        // Subtle spotlight effect
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+
+        // Tilt effect
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -5; // Subtle tilt
+        const rotateY = ((x - centerX) / centerX) * 5;
 
-        // Tilt calculation (inverted for natural feel)
-        const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg tilt
-        const rotateY = ((x - centerX) / centerX) * 10;
-
-        // Apply Tilt
         gsap.to(card, {
             rotateX: rotateX,
             rotateY: rotateY,
-            duration: 0.1, // Quick response
-            ease: "power1.out",
+            scale: 1.02,
+            duration: 0.4,
+            ease: "power2.out",
             overwrite: "auto"
         });
-
-        // Move Spotlight
-        card.style.setProperty('--mouse-x', `${x}px`);
-        card.style.setProperty('--mouse-y', `${y}px`);
     };
 
     const handleMouseLeave = (index: number) => {
@@ -106,50 +98,58 @@ export const FAQ: React.FC = () => {
 
         const card = cardsRef.current[index];
         if (!card) return;
+        const numberFill = card.querySelector('[data-number-fill="true"]');
 
-        // Reset Tilt
         gsap.to(card, {
             rotateX: 0,
             rotateY: 0,
-            duration: 0.5,
+            scale: 1,
+            duration: 0.6,
             ease: "elastic.out(1, 0.5)",
             overwrite: "auto"
         });
 
-        // Reset siblings opacity
-        gsap.to(cardsRef.current.filter(Boolean), {
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.4
-        });
+        // Reset gradient
+        if (numberFill) {
+            gsap.to(numberFill, {
+                backgroundPosition: "0% 100%",
+                duration: 0.6,
+                ease: "power2.out"
+            });
+        }
     };
 
     const handleMouseEnter = (index: number) => {
         if (window.innerWidth <= 768) return;
 
-        // Dim siblings
-        const others = cardsRef.current.filter((_, i) => i !== index && _);
-        gsap.to(others, {
-            opacity: 0.4,
-            filter: "blur(2px)",
-            duration: 0.4,
-            ease: "power2.out"
-        });
+        const card = cardsRef.current[index];
+
+        // Fill gradient on hover
+        if (card) {
+            const numberFill = card.querySelector('[data-number-fill="true"]');
+            if (numberFill) {
+                gsap.to(numberFill, {
+                    backgroundPosition: "0% 0%",
+                    duration: 0.8,
+                    ease: "power2.out"
+                });
+            }
+        }
     };
 
     return (
-        <section className="py-32 px-6 bg-stone-50 overflow-hidden" ref={containerRef}>
+        <section className={`py-32 px-6 overflow-hidden transition-colors duration-700 ${isAfterParty ? 'bg-[#0a0508]' : 'bg-stone-50'}`} ref={containerRef}>
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-20">
-                    <h2 className="text-sm md:text-base text-rose-500 font-bold tracking-[0.3em] uppercase mb-4 opacity-80">
+                <div className="text-center mb-20 relative">
+                    <h2 className={`text-sm md:text-base font-bold tracking-[0.3em] uppercase mb-4 opacity-80 ${isAfterParty ? 'text-purple-400' : 'text-rose-500'}`}>
                         MERAK EDİLENLER
                     </h2>
-                    <p className="text-4xl md:text-6xl font-serif text-stone-900 tracking-tight">
+                    <p className={`text-4xl md:text-6xl font-serif tracking-tight ${isAfterParty ? 'text-white' : 'text-stone-900'}`}>
                         Detaylar & Notlar
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 perspective-2000">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 perspective-1000">
                     {content.faq.map((item, idx) => (
                         <div
                             key={idx}
@@ -157,52 +157,72 @@ export const FAQ: React.FC = () => {
                             onMouseMove={(e) => handleMouseMove(e, idx)}
                             onMouseLeave={() => handleMouseLeave(idx)}
                             onMouseEnter={() => handleMouseEnter(idx)}
-                            className="group relative h-[400px] md:h-[500px] rounded-[2rem] bg-white border border-stone-200 shadow-xl overflow-hidden cursor-default preserve-3d will-change-transform hover:shadow-[0_20px_50px_-12px_rgba(244,63,94,0.25)] hover:border-rose-300 transition-all duration-500"
+                            className={`
+                                group relative h-[420px] rounded-[2rem] overflow-hidden cursor-default transition-all duration-500 will-change-transform
+                                border backdrop-blur-md
+                                ${isAfterParty
+                                    ? 'bg-purple-900/10 border-purple-500/20 hover:border-purple-500/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:shadow-[0_20px_60px_-15px_rgba(168,85,247,0.3)]'
+                                    : 'bg-white/40 border-white/60 hover:border-rose-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_-12px_rgba(244,63,94,0.15)]'
+                                }
+                            `}
                             style={{
                                 transformStyle: 'preserve-3d',
                                 '--mouse-x': '50%',
                                 '--mouse-y': '50%'
                             } as React.CSSProperties}
                         >
-                            {/* Spotlight Gradient - Enhanced Color */}
+                            {/* Spotlight/Glow Effect */}
                             <div
-                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
                                 style={{
-                                    background: `radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(244, 63, 94, 0.08), transparent 40%)`
+                                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), ${isAfterParty ? 'rgba(168, 85, 247, 0.08)' : 'rgba(244, 63, 94, 0.06)'}, transparent 40%)`
                                 }}
                             />
 
-                            {/* Card Content Container - Slight float effect */}
-                            <div className="relative h-full flex flex-col justify-between p-8 md:p-10 z-10 pointer-events-none select-none">
-                                {/* Number Watermark */}
-                                <div className="text-8xl font-serif text-stone-100/80 -ml-4 -mt-4 font-bold tracking-tighter">
-                                    0{idx + 1}
+                            <div className="relative h-full flex flex-col justify-between p-10 z-10 select-none">
+                                <div className="relative -ml-4 -mt-4 w-fit">
+                                    {/* Outline Number (Always visible base) */}
+                                    <span className={`block text-9xl font-serif font-bold tracking-tighter mix-blend-overlay opacity-20 ${isAfterParty ? 'text-purple-300' : 'text-stone-400'
+                                        }`}>
+                                        0{idx + 1}
+                                    </span>
+
+                                    {/* Liquid Fill Number (Animated) */}
+                                    <span
+                                        className="absolute top-0 left-0 block text-9xl font-serif font-bold tracking-tighter bg-clip-text text-transparent"
+                                        style={{
+                                            backgroundImage: isAfterParty
+                                                ? `linear-gradient(to top, #a855f7 50%, transparent 50%)`
+                                                : `linear-gradient(to top, #fb7185 50%, transparent 50%)`,
+                                            backgroundSize: '100% 200%',
+                                            backgroundPosition: '0% 100%', // Hidden initially
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextStroke: isAfterParty ? '1px rgba(168,85,247,0.2)' : '1px rgba(244,63,94,0.1)'
+                                        }}
+                                        data-number-fill="true"
+                                    >
+                                        0{idx + 1}
+                                    </span>
                                 </div>
 
                                 <div>
-                                    <h3 className="text-2xl md:text-3xl font-serif text-rose-950 mb-4 group-hover:text-rose-600 transition-colors duration-300">
+                                    <h3 className={`text-2xl font-serif mb-4 transition-colors duration-300 ${isAfterParty ? 'text-white' : 'text-stone-800 group-hover:text-rose-700'}`}>
                                         {item.q}
                                     </h3>
-                                    <p className="text-lg text-stone-600 font-light leading-relaxed">
+                                    <p className={`text-lg font-light leading-relaxed ${isAfterParty ? 'text-purple-200/70' : 'text-stone-600'}`}>
                                         {item.a}
                                     </p>
                                 </div>
 
-                                {/* Subtle Decoration */}
-                                <div className="w-full h-[1px] bg-gradient-to-r from-rose-200/0 via-rose-200 to-rose-200/0 opacity-50 mt-8" />
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Global CSS for perspective utility if not in tailwind config */}
             <style>{`
-                .perspective-2000 {
-                    perspective: 2000px;
-                }
-                .preserve-3d {
-                    transform-style: preserve-3d;
+                .perspective-1000 {
+                    perspective: 1000px;
                 }
             `}</style>
         </section>

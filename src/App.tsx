@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Hero } from './sections/Hero';
 import { Details } from './sections/Details';
 import { Guestbook } from './sections/Guestbook';
@@ -6,6 +6,7 @@ import { Gift } from './components/Gift';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import Lenis from '@studio-freight/lenis';
+import { content as normalContent, afterPartyContent } from './content';
 
 import { Preloader } from './components/Preloader';
 import { AdminLogin } from './components/AdminLogin';
@@ -25,6 +26,45 @@ function App() {
   });
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const lenisRef = useRef<Lenis | null>(null);
+
+  // After Party Detection
+  const isAfterParty = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('after_party') === 'true' || currentPath === '/after';
+  }, [currentPath]);
+
+  const content = isAfterParty ? afterPartyContent : normalContent;
+
+  // SEO & Meta Management for After Party
+  useEffect(() => {
+    if (isAfterParty) {
+      // Add noindex/nofollow for after party
+      let meta = document.querySelector('meta[name="robots"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'robots');
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', 'noindex, nofollow');
+
+      // Update color scheme for browser UI
+      let themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (!themeMeta) {
+        themeMeta = document.createElement('meta');
+        themeMeta.setAttribute('name', 'theme-color');
+        document.head.appendChild(themeMeta);
+      }
+      themeMeta.setAttribute('content', '#0a0508');
+
+    } else {
+      // Reset meta for wedding mode
+      const meta = document.querySelector('meta[name="robots"]');
+      if (meta) meta.setAttribute('content', 'index, follow');
+
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', '#fdf6f8');
+    }
+  }, [isAfterParty]);
 
   // Update path on popstate (back/forward)
   useEffect(() => {
@@ -113,18 +153,29 @@ function App() {
     localStorage.removeItem('wedding_admin_auth');
   };
 
+  const detailsData = {
+    date: content.date.full,
+    weekday: content.date.weekday,
+    time: content.date.time,
+    timeLabel: content.date.label,
+    locationName: content.location.name,
+    locationDistrict: content.location.district,
+    locationMapLink: content.location.mapLink,
+    calendar: content.date.calendar
+  };
+
   return (
-    <main className="w-full bg-bg-primary min-h-screen">
+    <main className={`w-full min-h-screen transition-colors duration-700 ${isAfterParty ? 'bg-[#0a0508]' : 'bg-bg-primary'}`}>
       <AnimatePresence mode='wait'>
-        {isLoading && <Preloader key="preloader" onComplete={() => setIsLoading(false)} />}
+        {isLoading && <Preloader key="preloader" onComplete={() => setIsLoading(false)} isAfterParty={isAfterParty} />}
       </AnimatePresence>
 
-      <Hero onUnlock={() => setIsLocked(false)} />
-      <Details />
-      <Guestbook isAdmin={isAdmin} onAdminLogout={handleAdminLogout} />
-      <FAQ />
-      <Gift />
-      <Footer />
+      <Hero onUnlock={() => setIsLocked(false)} isAfterParty={isAfterParty} content={content} />
+      <Details isAfterParty={isAfterParty} data={detailsData} />
+      <Guestbook isAdmin={isAdmin} onAdminLogout={handleAdminLogout} isAfterParty={isAfterParty} />
+      <FAQ isAfterParty={isAfterParty} />
+      <Gift isAfterParty={isAfterParty} />
+      <Footer isAfterParty={isAfterParty} />
     </main>
   );
 }
