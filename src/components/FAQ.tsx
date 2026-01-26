@@ -1,16 +1,19 @@
+
 import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { content } from '../content';
+import type { Content } from '../content';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface FAQProps {
     isAfterParty?: boolean;
+    content: Content;
 }
 
-export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
+export const FAQ: React.FC<FAQProps> = ({ isAfterParty, content }) => {
+
     const containerRef = useRef<HTMLDivElement>(null);
     const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -43,12 +46,11 @@ export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
         mm.add("(max-width: 768px)", () => {
             cards.forEach((card) => {
                 if (!card) return;
-
-                const numberFill = card.querySelector('[data-number-fill="true"]');
+                const numberFill = card.querySelector('.number-fill');
 
                 if (numberFill) {
                     gsap.to(numberFill, {
-                        backgroundPosition: "0% 0%", // Moves the gradient up to fill
+                        clipPath: "inset(0% 0% 0% 0%)",
                         scrollTrigger: {
                             trigger: card,
                             start: "top 85%",
@@ -80,7 +82,7 @@ export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
         // Tilt effect
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        const rotateX = ((y - centerY) / centerY) * -5; // Subtle tilt
+        const rotateX = ((y - centerY) / centerY) * -5;
         const rotateY = ((x - centerX) / centerX) * 5;
 
         gsap.to(card, {
@@ -98,7 +100,7 @@ export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
 
         const card = cardsRef.current[index];
         if (!card) return;
-        const numberFill = card.querySelector('[data-number-fill="true"]');
+        const numberFill = card.querySelector('.number-fill');
 
         gsap.to(card, {
             rotateX: 0,
@@ -109,10 +111,10 @@ export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
             overwrite: "auto"
         });
 
-        // Reset gradient
+        // Reset fill
         if (numberFill) {
             gsap.to(numberFill, {
-                backgroundPosition: "0% 100%",
+                clipPath: "inset(100% 0% 0% 0%)",
                 duration: 0.6,
                 ease: "power2.out"
             });
@@ -126,10 +128,10 @@ export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
 
         // Fill gradient on hover
         if (card) {
-            const numberFill = card.querySelector('[data-number-fill="true"]');
+            const numberFill = card.querySelector('.number-fill');
             if (numberFill) {
                 gsap.to(numberFill, {
-                    backgroundPosition: "0% 0%",
+                    clipPath: "inset(0% 0% 0% 0%)",
                     duration: 0.8,
                     ease: "power2.out"
                 });
@@ -142,10 +144,10 @@ export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-20 relative">
                     <h2 className={`text-sm md:text-base font-bold tracking-[0.3em] uppercase mb-4 opacity-80 ${isAfterParty ? 'text-purple-400' : 'text-rose-500'}`}>
-                        MERAK EDİLENLER
+                        {content.faqSection.title}
                     </h2>
                     <p className={`text-4xl md:text-6xl font-serif tracking-tight ${isAfterParty ? 'text-white' : 'text-stone-900'}`}>
-                        Detaylar & Notlar
+                        {content.faqSection.subtitle}
                     </p>
                 </div>
 
@@ -182,24 +184,17 @@ export const FAQ: React.FC<FAQProps> = ({ isAfterParty }) => {
                             <div className="relative h-full flex flex-col justify-between p-10 z-10 select-none">
                                 <div className="relative -ml-4 -mt-4 w-fit">
                                     {/* Outline Number (Always visible base) */}
-                                    <span className={`block text-9xl font-serif font-bold tracking-tighter mix-blend-overlay opacity-20 ${isAfterParty ? 'text-purple-300' : 'text-stone-400'
-                                        }`}>
+                                    <span className={`block text-9xl font-serif font-bold tracking-tighter opacity-20 ${isAfterParty ? 'text-purple-300' : 'text-stone-400'
+                                        }`} style={{ WebkitTextStroke: isAfterParty ? '2px rgba(168,85,247,0.5)' : '2px rgba(244,63,94,0.3)', color: 'transparent' }}>
                                         0{idx + 1}
                                     </span>
 
                                     {/* Liquid Fill Number (Animated) */}
                                     <span
-                                        className="absolute top-0 left-0 block text-9xl font-serif font-bold tracking-tighter bg-clip-text text-transparent"
+                                        className={`number-fill absolute top-0 left-0 block text-9xl font-serif font-bold tracking-tighter ${isAfterParty ? 'text-purple-400' : 'text-rose-500'}`}
                                         style={{
-                                            backgroundImage: isAfterParty
-                                                ? `linear-gradient(to top, #a855f7 50%, transparent 50%)`
-                                                : `linear-gradient(to top, #fb7185 50%, transparent 50%)`,
-                                            backgroundSize: '100% 200%',
-                                            backgroundPosition: '0% 100%', // Hidden initially
-                                            WebkitBackgroundClip: 'text',
-                                            WebkitTextStroke: isAfterParty ? '1px rgba(168,85,247,0.2)' : '1px rgba(244,63,94,0.1)'
+                                            clipPath: 'inset(100% 0% 0% 0%)'
                                         }}
-                                        data-number-fill="true"
                                     >
                                         0{idx + 1}
                                     </span>

@@ -1,17 +1,20 @@
 import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import type { Content } from '../content';
 
 interface PreloaderProps {
     onComplete: () => void;
     isAfterParty?: boolean;
+    content: Content;
 }
 
-export const Preloader: React.FC<PreloaderProps> = ({ onComplete, isAfterParty }) => {
+export const Preloader: React.FC<PreloaderProps> = ({ onComplete, isAfterParty, content }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLParagraphElement>(null);
 
-    const text = isAfterParty ? "Gece başlıyor..." : "Birlikte, nihayet...";
+    const text = content.preloader.text;
+
 
     // Disable scroll while preloader is active
     React.useLayoutEffect(() => {

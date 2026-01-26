@@ -8,6 +8,7 @@ import { db, storage } from '../lib/firebase';
 import { CameraModal } from '../components/CameraModal';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, doc, limit, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import type { Content } from '../content';
 
 interface Photo {
     id: string;
@@ -17,9 +18,9 @@ interface Photo {
     rotation: number;
     userId?: string;
     storagePath?: string;
-    type?: 'image' | 'video'; // Added to support video uploads
-    mimeType?: string; // Explicit MIME type for better browser compatibility
-    isHidden?: boolean; // Soft delete flag
+    type?: 'image' | 'video';
+    mimeType?: string;
+    isHidden?: boolean;
 }
 
 const PhotoCard: React.FC<{
@@ -28,7 +29,8 @@ const PhotoCard: React.FC<{
     isAdmin: boolean;
     onDelete: (photo: Photo) => void;
     isAfterParty?: boolean;
-}> = ({ photo, userId, onDelete, isAdmin, isAfterParty }) => {
+    content: Content;
+}> = ({ photo, userId, onDelete, isAdmin, isAfterParty, content }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -99,7 +101,7 @@ const PhotoCard: React.FC<{
                 <button
                     onClick={(e) => { e.stopPropagation(); onDelete(photo); }}
                     className="absolute -right-3 -top-3 w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg z-30 hover:bg-red-700 hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
-                    title="Yönetici Silme Yetkisi"
+                    title={content.guestbook.delete.adminTitle}
                 >
                     <Trash2 size={18} />
                 </button>
@@ -113,7 +115,7 @@ const PhotoCard: React.FC<{
                         exit={{ opacity: 0, scale: 0.9 }}
                         onClick={(e) => { e.stopPropagation(); onDelete(photo); }}
                         className={`absolute -right-2 -top-4 flex items-center gap-1.5 pl-2 pr-3 py-1.5 rounded-full shadow-lg z-20 transition-colors ${isAfterParty ? 'bg-[#1a1a1a] text-purple-400 border-purple-500/30 hover:bg-purple-900/20' : 'bg-white text-rose-500 border-rose-100 hover:bg-rose-50'}`}
-                        title="Silmek için kalan süre"
+                        title={content.guestbook.delete.button}
                     >
                         <div className="relative flex items-center justify-center w-5 h-5">
                             <svg className="absolute inset-0 -rotate-90" viewBox="0 0 24 24">
@@ -131,7 +133,7 @@ const PhotoCard: React.FC<{
                             <Trash2 size={10} className={`relative z-10 ${isAfterParty ? 'text-purple-400' : 'text-rose-600'}`} />
                         </div>
                         <span className="text-xs font-semibold tabular-nums leading-none">
-                            Sil ({timeLeft})
+                            {content.guestbook.delete.button} ({timeLeft})
                         </span>
                     </motion.button>
                 )}
@@ -151,7 +153,6 @@ const PhotoCard: React.FC<{
                             className="w-full h-full object-contain bg-stone-900"
                         >
                             <source src={photo.url} type={photo.mimeType || 'video/mp4'} />
-                            Tarayıcınız bu videoyu desteklemiyor.
                         </video>
 
                         <motion.div
@@ -170,7 +171,7 @@ const PhotoCard: React.FC<{
                             <button
                                 onClick={toggleMute}
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transform hover:scale-110 transition-transform"
-                                title={isMuted ? "Sesi Aç" : "Sesi Kapat"}
+                                title={isMuted ? "Unmute" : "Mute"}
                             >
                                 {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                             </button>
@@ -192,7 +193,7 @@ const PhotoCard: React.FC<{
                             onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
                             className={`inline-block ml-1 font-sans text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full transition-colors ${isAfterParty ? 'text-purple-400 bg-purple-950/50 hover:text-purple-300' : 'text-rose-500 bg-rose-50 hover:text-rose-600'}`}
                         >
-                            {isExpanded ? 'Gizle' : 'Devamını Gör'}
+                            {isExpanded ? 'Show Less' : 'Show More'}
                         </button>
                     )}
                 </div>
@@ -200,7 +201,7 @@ const PhotoCard: React.FC<{
 
             {photo.timestamp && (
                 <div className={`absolute bottom-2 right-4 text-[10px] font-mono ${isAfterParty ? 'text-purple-300/30' : 'text-stone-300'}`}>
-                    {photo.timestamp.toLocaleDateString('tr-TR')} {photo.timestamp.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                    {photo.timestamp.toLocaleDateString(content.lang === 'tr' ? 'tr-TR' : 'en-US')} {photo.timestamp.toLocaleTimeString(content.lang === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                 </div>
             )}
         </motion.div>
@@ -211,7 +212,8 @@ export const Guestbook: React.FC<{
     isAdmin?: boolean;
     onAdminLogout?: () => void;
     isAfterParty?: boolean;
-}> = ({ isAdmin = false, onAdminLogout, isAfterParty }) => {
+    content: Content;
+}> = ({ isAdmin = false, onAdminLogout, isAfterParty, content }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -236,9 +238,7 @@ export const Guestbook: React.FC<{
         setShowCamera(false);
     };
 
-    const headerLines = isAfterParty
-        ? ["Kutlama asıl şimdi başlıyor.", "Gece bizim!"]
-        : ["Bu hikâye yıllardır ‘biz’di.", "Şimdi resmileşiyor."];
+    const headerLines = content.guestbook.headerLines;
 
     const titleColors = isAfterParty
         ? { icon: "text-purple-400", sub: "text-purple-300", accent: "text-purple-100" }
@@ -271,7 +271,7 @@ export const Guestbook: React.FC<{
                 stagger: 0.03,
                 duration: 0.05,
                 ease: "none"
-            }, "+=0.1"); // Slight pause between lines
+            }, "+=0.1");
 
     }, { scope: containerRef });
 
@@ -325,7 +325,7 @@ export const Guestbook: React.FC<{
 
             // 1. Size Check (100MB)
             if (file.size > 100 * 1024 * 1024) {
-                alert("Dosya boyutu çok büyük! Lütfen 100MB'dan küçük bir dosya seçin.");
+                alert(content.guestbook.errors.fileSize);
                 return;
             }
 
@@ -333,7 +333,7 @@ export const Guestbook: React.FC<{
             if (file.type.startsWith('video/')) {
                 const duration = await getVideoDuration(file);
                 if (duration > 15) {
-                    alert("Video süresi 15 saniyeden uzun olamaz.");
+                    alert(content.guestbook.errors.videoDuration);
                     return;
                 }
             }
@@ -382,23 +382,22 @@ export const Guestbook: React.FC<{
             handleCloseUpload();
         } catch (error) {
             console.error("Error uploading photo:", error);
-            alert("Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+            alert(content.guestbook.errors.upload);
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDelete = async (photo: Photo) => {
-        if (!confirm("Bu anıyı silmek istiyor musun? İşlem geri alınamaz.")) return;
+        if (!confirm(content.guestbook.delete.confirm)) return;
 
         try {
-            // Soft Delete: Just mark as hidden in Firestore
             await updateDoc(doc(db, 'guestbook', photo.id), {
                 isHidden: true
             });
         } catch (error) {
             console.error("Error soft-deleting photo:", error);
-            alert("Silinirken bir hata oluştu.");
+            alert("Error");
         }
     };
 
@@ -420,12 +419,12 @@ export const Guestbook: React.FC<{
                     <div className="retro-title-content select-none">
                         <div className={`flex items-center justify-center gap-2 font-bold tracking-[0.2em] uppercase mb-4 ${titleColors.icon}`}>
                             <Camera size={20} />
-                            <span>SİZDEN KARELER</span>
+                            <span>{content.guestbook.eyebrow}</span>
                         </div>
                         <h2
                             className={`text-4xl md:text-5xl font-serif mb-6 font-medium cursor-default select-none relative ${isAfterParty ? 'text-white' : 'text-stone-800'}`}
                         >
-                            Anı Duvarı
+                            {content.guestbook.title}
                             <AnimatePresence>
                                 {isAdmin && (
                                     <motion.button
@@ -434,9 +433,9 @@ export const Guestbook: React.FC<{
                                         exit={{ opacity: 0, y: -10 }}
                                         onClick={onAdminLogout}
                                         className={`absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold tracking-widest rounded-full uppercase border shadow-sm transition-all group/admin ${isAfterParty ? 'bg-purple-950/40 text-purple-300 border-purple-500/30' : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:scale-105'}`}
-                                        title="Admin Modunu Kapat"
+                                        title={content.guestbook.adminLogout}
                                     >
-                                        <span className="relative">Yönetici Modu Aktif</span>
+                                        <span className="relative">{content.guestbook.adminBadge}</span>
                                         <LogOut size={12} className="group-hover/admin:translate-x-0.5 transition-transform" />
                                     </motion.button>
                                 )}
@@ -488,8 +487,8 @@ export const Guestbook: React.FC<{
                                         <Upload size={32} />
                                     </div>
                                     <div className="text-center">
-                                        <span className={`block font-serif text-lg mb-1 ${isAfterParty ? 'text-purple-100' : 'text-stone-800'}`}>Galeriden Seç</span>
-                                        <span className={`text-xs uppercase tracking-wider ${isAfterParty ? 'text-purple-400/60' : 'text-stone-400'}`}>Fotoğraf / Video</span>
+                                        <span className={`block font-serif text-lg mb-1 ${isAfterParty ? 'text-purple-100' : 'text-stone-800'}`}>{content.guestbook.upload.gallery.title}</span>
+                                        <span className={`text-xs uppercase tracking-wider ${isAfterParty ? 'text-purple-400/60' : 'text-stone-400'}`}>{content.guestbook.upload.gallery.sub}</span>
                                     </div>
                                     <input
                                         type="file"
@@ -513,8 +512,8 @@ export const Guestbook: React.FC<{
                                         <Camera size={32} />
                                     </div>
                                     <div className="text-center">
-                                        <span className="block font-serif text-lg mb-1">Kamerayı Aç</span>
-                                        <span className="text-xs text-white/70 uppercase tracking-wider">Anı Yakala</span>
+                                        <span className="block font-serif text-lg mb-1">{content.guestbook.upload.camera.title}</span>
+                                        <span className="text-xs text-white/70 uppercase tracking-wider">{content.guestbook.upload.camera.sub}</span>
                                     </div>
                                 </motion.button>
                             </div>
@@ -529,7 +528,7 @@ export const Guestbook: React.FC<{
                                     onClick={handleCloseUpload}
                                     disabled={isSubmitting}
                                     className={`absolute -top-3 -right-3 p-2 rounded-full shadow-lg border transition-all z-20 ${isAfterParty ? 'bg-[#2a2a2a] text-purple-300 border-purple-500/20 hover:text-red-400' : 'bg-white text-stone-400 hover:text-red-500 hover:bg-red-50 border-stone-100'}`}
-                                    title="İptal"
+                                    title={content.guestbook.upload.cancel}
                                 >
                                     <X size={20} />
                                 </button>
@@ -544,7 +543,7 @@ export const Guestbook: React.FC<{
 
                                 <input
                                     type="text"
-                                    placeholder="Bir not bırakın... (İsteğe bağlı)"
+                                    placeholder={content.guestbook.upload.placeholder}
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value)}
                                     disabled={isSubmitting}
@@ -559,10 +558,10 @@ export const Guestbook: React.FC<{
                                     {isSubmitting ? (
                                         <>
                                             <Loader2 size={18} className="animate-spin" />
-                                            Yükleniyor...
+                                            {content.guestbook.upload.loading}
                                         </>
                                     ) : (
-                                        "Duvara As"
+                                        content.guestbook.upload.post
                                     )}
                                 </button>
                             </motion.div>
@@ -580,13 +579,14 @@ export const Guestbook: React.FC<{
                                 isAdmin={isAdmin}
                                 onDelete={handleDelete}
                                 isAfterParty={isAfterParty}
+                                content={content}
                             />
                         ))}
                     </AnimatePresence>
 
                     {photos.length === 0 && (
                         <div className={`col-span-full py-24 text-center font-serif italic ${isAfterParty ? 'text-purple-300/40' : 'text-stone-400'}`}>
-                            Henüz fotoğraf yok. İlk anıyı sen ekle! ✨
+                            {content.guestbook.emptyState}
                         </div>
                     )}
                 </div>
@@ -597,7 +597,7 @@ export const Guestbook: React.FC<{
                             onClick={() => setVisibleCount(prev => prev + 6)}
                             className={`px-8 py-3 rounded-full font-serif shadow-sm border transition-all active:scale-95 ${isAfterParty ? 'bg-purple-950/20 text-purple-300 border-purple-500/20 hover:border-purple-400 hover:bg-purple-900/30' : 'bg-white text-stone-600 border-stone-200 hover:border-rose-300 hover:text-rose-500'}`}
                         >
-                            Daha Fazla Göster
+                            {content.guestbook.loadMore}
                         </button>
                     </div>
                 )}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Hero } from './sections/Hero';
 import { Details } from './sections/Details';
 import { Guestbook } from './sections/Guestbook';
@@ -6,12 +6,11 @@ import { Gift } from './components/Gift';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import Lenis from '@studio-freight/lenis';
-import { content as normalContent, afterPartyContent } from './content';
-
+import { weddingTR, partyTR, weddingEN, partyEN, type Content } from './content';
 import { Preloader } from './components/Preloader';
 import { AdminLogin } from './components/AdminLogin';
-import { useState, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 
 // Prevent browser from restoring scroll position on refresh
 if (typeof window !== 'undefined') {
@@ -25,6 +24,12 @@ function App() {
     return localStorage.getItem('wedding_admin_auth') === 'true';
   });
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  // Language State
+  const [lang, setLang] = useState<'tr' | 'en'>(() => {
+    return (localStorage.getItem('wedding_lang') as 'tr' | 'en') || 'tr';
+  });
+
   const lenisRef = useRef<Lenis | null>(null);
 
   // After Party Detection
@@ -33,38 +38,53 @@ function App() {
     return params.get('after_party') === 'true' || currentPath === '/after';
   }, [currentPath]);
 
-  const content = isAfterParty ? afterPartyContent : normalContent;
-
-  // SEO & Meta Management for After Party
-  useEffect(() => {
-    if (isAfterParty) {
-      // Add noindex/nofollow for after party
-      let meta = document.querySelector('meta[name="robots"]');
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'robots');
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', 'noindex, nofollow');
-
-      // Update color scheme for browser UI
-      let themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (!themeMeta) {
-        themeMeta = document.createElement('meta');
-        themeMeta.setAttribute('name', 'theme-color');
-        document.head.appendChild(themeMeta);
-      }
-      themeMeta.setAttribute('content', '#0a0508');
-
+  // Content Selection
+  const content: Content = useMemo(() => {
+    if (lang === 'tr') {
+      return isAfterParty ? partyTR : weddingTR;
     } else {
-      // Reset meta for wedding mode
-      const meta = document.querySelector('meta[name="robots"]');
-      if (meta) meta.setAttribute('content', 'index, follow');
-
-      const themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeMeta) themeMeta.setAttribute('content', '#fdf6f8');
+      return isAfterParty ? partyEN : weddingEN;
     }
-  }, [isAfterParty]);
+  }, [lang, isAfterParty]);
+
+  const handleLangToggle = (newLang: 'tr' | 'en') => {
+    setLang(newLang);
+    localStorage.setItem('wedding_lang', newLang);
+  };
+
+  // SEO & Meta Management
+  useEffect(() => {
+    // 1. Robots
+    let robotsMeta = document.querySelector('meta[name="robots"]');
+    if (!robotsMeta) {
+      robotsMeta = document.createElement('meta');
+      robotsMeta.setAttribute('name', 'robots');
+      document.head.appendChild(robotsMeta);
+    }
+    if (isAfterParty) {
+      robotsMeta.setAttribute('content', 'noindex, nofollow');
+    } else {
+      robotsMeta.setAttribute('content', 'index, follow');
+    }
+
+    // 2. Theme Color
+    let themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (!themeMeta) {
+      themeMeta = document.createElement('meta');
+      themeMeta.setAttribute('name', 'theme-color');
+      document.head.appendChild(themeMeta);
+    }
+    themeMeta.setAttribute('content', isAfterParty ? '#0a0508' : '#fdf6f8');
+
+    // 3. Document Title & Description
+    document.title = content.meta.title;
+    let descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) {
+      descMeta.setAttribute('content', content.meta.description);
+    }
+    document.documentElement.lang = content.lang;
+
+  }, [isAfterParty, content]);
 
   // Update path on popstate (back/forward)
   useEffect(() => {
@@ -120,18 +140,14 @@ function App() {
       lenisRef.current = null;
     };
 
-  }, []); // Empty dependency mainly because we want single instantiation
+  }, []);
 
   // Force scroll to top on mount
   useEffect(() => {
-    // Immediate reset
     window.scrollTo(0, 0);
-
-    // Backup reset for mobile/slower loads
     const timer = setTimeout(() => {
       window.scrollTo(0, 0);
     }, 100);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -166,16 +182,18 @@ function App() {
 
   return (
     <main className={`w-full min-h-screen transition-colors duration-700 ${isAfterParty ? 'bg-[#0a0508]' : 'bg-bg-primary'}`}>
+      <LanguageSwitcher currentLang={lang} onToggle={handleLangToggle} isAfterParty={isAfterParty} />
+
       <AnimatePresence mode='wait'>
-        {isLoading && <Preloader key="preloader" onComplete={() => setIsLoading(false)} isAfterParty={isAfterParty} />}
+        {isLoading && <Preloader key="preloader" onComplete={() => setIsLoading(false)} isAfterParty={isAfterParty} content={content} />}
       </AnimatePresence>
 
       <Hero onUnlock={() => setIsLocked(false)} isAfterParty={isAfterParty} content={content} />
-      <Details isAfterParty={isAfterParty} data={detailsData} />
-      <Guestbook isAdmin={isAdmin} onAdminLogout={handleAdminLogout} isAfterParty={isAfterParty} />
-      <FAQ isAfterParty={isAfterParty} />
-      <Gift isAfterParty={isAfterParty} />
-      <Footer isAfterParty={isAfterParty} />
+      <Details isAfterParty={isAfterParty} data={detailsData} content={content} />
+      <Guestbook isAdmin={isAdmin} onAdminLogout={handleAdminLogout} isAfterParty={isAfterParty} content={content} />
+      <FAQ isAfterParty={isAfterParty} content={content} />
+      <Gift isAfterParty={isAfterParty} content={content} />
+      <Footer isAfterParty={isAfterParty} content={content} />
     </main>
   );
 }

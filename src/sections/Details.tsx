@@ -3,6 +3,7 @@ import { Section } from '../components/Section';
 import { Calendar, MapPin } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import type { Content } from '../content';
 
 interface DetailsProps {
     isAfterParty?: boolean;
@@ -21,10 +22,11 @@ interface DetailsProps {
             start: string;
             end: string;
         }
-    }
+    };
+    content: Content;
 }
 
-export const Details: React.FC<DetailsProps> = ({ isAfterParty, data }) => {
+export const Details: React.FC<DetailsProps> = ({ isAfterParty, data, content }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
@@ -73,7 +75,9 @@ END:VCALENDAR`;
                     {/* ZAMAN KARTI */}
                     <div className={`detail-card rounded-[2.5rem] border p-10 md:p-14 shadow-[0_20px_60px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-colors ${isAfterParty ? 'bg-purple-950/10 border-purple-500/20 shadow-purple-500/5' : 'bg-white border-stone-100'}`}>
                         <div>
-                            <span className={`text-[10px] font-bold tracking-[0.3em] uppercase mb-12 block font-sans ${isAfterParty ? 'text-purple-400' : 'text-rose-400'}`}>ZAMAN</span>
+                            <span className={`text-[10px] font-bold tracking-[0.3em] uppercase mb-12 block font-sans ${isAfterParty ? 'text-purple-400' : 'text-rose-400'}`}>
+                                {content.detailsSection.timeTitle}
+                            </span>
 
                             <div className="mb-12">
                                 <h3 className={`text-5xl md:text-6xl font-serif mb-4 tracking-tight ${isAfterParty ? 'text-white' : 'text-stone-800'}`}>{data.date}</h3>
@@ -97,14 +101,18 @@ END:VCALENDAR`;
                             <div className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-colors ${isAfterParty ? 'bg-purple-900/20 group-hover/btn:bg-purple-800/30 border-purple-500/20' : 'bg-stone-50 group-hover/btn:bg-rose-50 border-stone-100/50'}`}>
                                 <Calendar size={18} className="transition-colors" />
                             </div>
-                            <span className={`text-sm font-medium border-b py-0.5 ${isAfterParty ? 'border-purple-300/30 group-hover/btn:border-purple-400' : 'border-stone-200 group-hover/btn:border-rose-200'}`}>Takvime Ekle (.ics)</span>
+                            <span className={`text-sm font-medium border-b py-0.5 ${isAfterParty ? 'border-purple-300/30 group-hover/btn:border-purple-400' : 'border-stone-200 group-hover/btn:border-rose-200'}`}>
+                                {content.detailsSection.calendarBtn}
+                            </span>
                         </button>
                     </div>
 
                     {/* MEKÂN KARTI */}
                     <div className={`detail-card rounded-[2.5rem] border p-10 md:p-14 shadow-[0_20px_60px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-colors ${isAfterParty ? 'bg-purple-950/10 border-purple-500/20 shadow-purple-500/5' : 'bg-white border-stone-100'}`}>
                         <div>
-                            <span className={`text-[10px] font-bold tracking-[0.3em] uppercase mb-12 block font-sans ${isAfterParty ? 'text-purple-400' : 'text-rose-400'}`}>MEKÂN</span>
+                            <span className={`text-[10px] font-bold tracking-[0.3em] uppercase mb-12 block font-sans ${isAfterParty ? 'text-purple-400' : 'text-rose-400'}`}>
+                                {content.detailsSection.locationTitle}
+                            </span>
 
                             <div className="mb-12">
                                 <h3 className={`text-4xl md:text-5xl font-serif mb-4 leading-[1.15] tracking-tight ${isAfterParty ? 'text-white' : 'text-stone-800'}`}>{data.locationName}</h3>
@@ -122,7 +130,9 @@ END:VCALENDAR`;
                                 <div className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-colors ${isAfterParty ? 'bg-purple-900/30 border-purple-500/30 group-hover/link:bg-purple-800/40' : 'bg-rose-50 border-rose-100/50 group-hover/link:bg-rose-100/50'}`}>
                                     <MapPin size={18} />
                                 </div>
-                                <span className={`text-sm font-semibold border-b py-0.5 ${isAfterParty ? 'border-purple-500/30 group-hover/link:border-purple-300' : 'border-rose-200 group-hover/link:border-rose-400'}`}>Haritada Yol Tarifi</span>
+                                <span className={`text-sm font-semibold border-b py-0.5 ${isAfterParty ? 'border-purple-500/30 group-hover/link:border-purple-300' : 'border-rose-200 group-hover/link:border-rose-400'}`}>
+                                    {content.detailsSection.directionsBtn}
+                                </span>
                             </a>
                         </div>
                     </div>
@@ -131,3 +141,4 @@ END:VCALENDAR`;
         </Section>
     );
 };
+

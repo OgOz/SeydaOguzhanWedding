@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
+import type { Content } from '../content';
 
 // Simple Toast Component
 const Toast: React.FC<{ message: string; isVisible: boolean; isAfterParty?: boolean }> = ({ message, isVisible, isAfterParty }) => (
@@ -19,9 +20,10 @@ const Toast: React.FC<{ message: string; isVisible: boolean; isAfterParty?: bool
 
 interface GiftProps {
     isAfterParty?: boolean;
+    content: Content;
 }
 
-export const Gift: React.FC<GiftProps> = ({ isAfterParty }) => {
+export const Gift: React.FC<GiftProps> = ({ isAfterParty, content }) => {
     const [clickCount, setClickCount] = useState(0);
     const controls = useAnimation();
     const [showToast, setShowToast] = useState(false);
@@ -29,26 +31,18 @@ export const Gift: React.FC<GiftProps> = ({ isAfterParty }) => {
     // IBAN Constant
     const IBAN = "TR49 0006 2000 7790 0006 6050 39";
 
-    const messages = [
-        "Bizim için en büyük hediye; yanımızda olmanız 🤍",
-        "Cidden söylüyoruz, başka hiçbir şeye gerek yok 🙂",
-        "Bu gün; sevgiyle, dostlukla hatırlansın istiyoruz ✨",
-        "Biz mutluyuz — sizin varlığınız bize yetiyor 🤍",
-        "Hediye konusunu dert etmeyin, keyfimize bakalım 🎉",
-        "Bakın, söz veriyoruz: kırılmayız 😄",
-        "Nazik düşünceniz bize fazlasıyla değerli 🙏",
-        "Pero biz bu günü sade tutmak istiyoruz 🌿",
-        "İnatçı olduğunuzu biliyoruz… yine de yok diyoruz 😄",
-        "Gerçekten: varlığınız bizim için en güzeli 🤍",
-        "Şimdi eğlenmeye dönelim, gerisini boş verelim 🎶",
-        "İyi ki varsınız — birlikte kutlamak yeter 🎊",
-        "Eğer içiniz rahat etmeyecekse, küçük bir katkıyı sevgiyle kabul ederiz 🤍",
-        "Ama bilin ki: bizim için en değerli hediye hâlâ sizsiniz ✨"
-    ];
+    const messages = content.gift.messages;
 
     const [message, setMessage] = useState(messages[0]);
     const [isCaught, setIsCaught] = useState(false);
     const [isCooldown, setIsCooldown] = useState(false);
+
+    // Reset state if lang changes (optional, but good for UX)
+    React.useEffect(() => {
+        setMessage(messages[0]);
+        setClickCount(0);
+        setIsCaught(false);
+    }, [content.lang]);
 
     const handleCopyIBAN = async () => {
         try {
@@ -89,16 +83,16 @@ export const Gift: React.FC<GiftProps> = ({ isAfterParty }) => {
 
     return (
         <section id="gift" className={`py-24 px-6 overflow-hidden relative transition-colors duration-700 ${isAfterParty ? 'bg-[#0a0508]' : 'bg-rose-50'}`}>
-            <Toast message="IBAN Kopyalandı" isVisible={showToast} isAfterParty={isAfterParty} />
+            <Toast message={content.gift.modal.copied} isVisible={showToast} isAfterParty={isAfterParty} />
 
             <div className="max-w-md mx-auto text-center space-y-12">
 
                 <div className="space-y-4">
                     <h2 className={`text-sm md:text-base font-bold tracking-[0.2em] uppercase ${isAfterParty ? 'text-purple-400' : 'text-rose-500'}`}>
-                        {isAfterParty ? 'DESTEK' : 'HEDİYE'}
+                        {content.gift.eyebrow}
                     </h2>
                     <p className={`text-xl md:text-2xl font-serif italic ${isAfterParty ? 'text-purple-200/60' : 'text-stone-500'}`}>
-                        {isCaught ? "Desteğiniz için teşekkürler." : "Ufak bir katkı?"}
+                        {isCaught ? content.gift.catchPhrase.caught : content.gift.catchPhrase.default}
                     </p>
                 </div>
 
@@ -128,10 +122,10 @@ export const Gift: React.FC<GiftProps> = ({ isAfterParty }) => {
                     >
                         <div className="space-y-2">
                             <p className={`font-medium ${isAfterParty ? 'text-purple-100' : 'text-rose-900/80'}`}>
-                                Şaka bir yana, yanımızda olmanız en büyük hediye.
+                                {content.gift.modal.title}
                             </p>
                             <p className={`text-sm ${isAfterParty ? 'text-purple-300/60' : 'text-stone-500'}`}>
-                                Yine de katkıda bulunmak isterseniz aşağıdan bilgilerimize ulaşabilirsiniz:
+                                {content.gift.modal.sub}
                             </p>
                         </div>
 
@@ -146,7 +140,7 @@ export const Gift: React.FC<GiftProps> = ({ isAfterParty }) => {
                             className={`w-full py-3.5 text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2 active:scale-95 shadow-lg ${isAfterParty ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-500/20' : 'bg-rose-500 hover:bg-rose-600 shadow-rose-200'}`}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
-                            IBAN Kopyala
+                            {content.gift.modal.copy}
                         </button>
                     </motion.div>
                 )}

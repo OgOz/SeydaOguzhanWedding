@@ -157,7 +157,7 @@ export const Hero: React.FC<HeroProps> = ({ onUnlock, isAfterParty, content }) =
 
                 {/* Hold Hint */}
                 <div className={`hero-reveal hold-hint text-sm md:text-base font-bold tracking-[0.25em] uppercase opacity-0 mb-8 md:mb-12 drop-shadow-sm ${isAfterParty ? 'text-purple-400' : 'text-rose-500'}`}>
-                    {isAfterParty ? 'Partiye Giriş Yapın' : 'Kalbe Basılı Tutun'}
+                    {content.hero.holdHint}
                 </div>
 
                 {/* Date & Location Pill */}
@@ -173,7 +173,7 @@ export const Hero: React.FC<HeroProps> = ({ onUnlock, isAfterParty, content }) =
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isAfterParty ? 'text-purple-400' : 'text-rose-500'}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                             <span className={`text-[10px] md:text-xs uppercase tracking-widest font-semibold ${isAfterParty ? 'text-purple-100' : 'text-rose-900/70'}`}>{content.location.name}, {content.location.district}</span>
                         </div>
-                        <span className={`text-[10px] tracking-[0.2em] uppercase ${isAfterParty ? 'text-purple-400/60' : 'text-rose-900/40'}`}>{isAfterParty ? "EĞLENCEYE HAZIR OLUN" : "Gelin, birlikte kutlayalım"}</span>
+                        <span className={`text-[10px] tracking-[0.2em] uppercase ${isAfterParty ? 'text-purple-400/60' : 'text-rose-900/40'}`}>{content.hero.scrollText}</span>
                     </div>
                 </div>
 
