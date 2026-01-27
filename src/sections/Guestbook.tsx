@@ -21,6 +21,7 @@ interface Photo {
     type?: 'image' | 'video';
     mimeType?: string;
     isHidden?: boolean;
+    eventType?: 'wedding' | 'after_party';
 }
 
 const PhotoCard: React.FC<{
@@ -289,10 +290,15 @@ export const Guestbook: React.FC<{
 
     // Fetch Photos
     useEffect(() => {
+        // We fetch a larger batch of photos and filter client-side to handle the 
+        // separation of Wedding and After Party events without requiring complex 
+        // composite indexes for every combination of fields.
+        // Limit of 500 should be sufficient for most events; 
+        // real infinite scroll would require a different architecture.
         const q = query(
             collection(db, 'guestbook'),
             orderBy('timestamp', 'desc'),
-            limit(visibleCount)
+            limit(500)
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -308,16 +314,26 @@ export const Guestbook: React.FC<{
                     type: data.type || 'image',
                     mimeType: data.mimeType,
                     isHidden: data.isHidden || false,
+                    eventType: data.eventType,
                     timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date(),
                 } as Photo;
-            }).filter(photo => !photo.isHidden);
+            })
+                .filter(photo => !photo.isHidden)
+                .filter(photo => {
+                    if (isAfterParty) {
+                        return photo.eventType === 'after_party';
+                    } else {
+                        return photo.eventType !== 'after_party';
+                    }
+                });
+
             setPhotos(fetchedPhotos);
         }, (error) => {
             console.error("Realtime listener error:", error);
         });
 
         return () => unsubscribe();
-    }, [visibleCount]);
+    }, [isAfterParty]);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -376,7 +392,8 @@ export const Guestbook: React.FC<{
                 userId: userId,
                 storagePath: filename,
                 type: selectedFile.type.startsWith('video/') ? 'video' : 'image',
-                mimeType: selectedFile.type
+                mimeType: selectedFile.type,
+                eventType: isAfterParty ? 'after_party' : 'wedding'
             });
 
             handleCloseUpload();
@@ -571,7 +588,7 @@ export const Guestbook: React.FC<{
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 md:gap-x-10 gap-y-12 md:gap-y-16 max-w-7xl mx-auto items-start">
                     <AnimatePresence>
-                        {photos.map((photo) => (
+                        {photos.slice(0, visibleCount).map((photo) => (
                             <PhotoCard
                                 key={photo.id}
                                 photo={photo}
@@ -591,7 +608,7 @@ export const Guestbook: React.FC<{
                     )}
                 </div>
 
-                {photos.length >= visibleCount && (
+                {photos.length > visibleCount && (
                     <div className="flex justify-center mt-12">
                         <button
                             onClick={() => setVisibleCount(prev => prev + 6)}
