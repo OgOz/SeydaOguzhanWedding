@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { motion, useAnimation, useMotionValue, useTransform, animate } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { motion, useAnimation, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
 import { useHoldSound } from '../hooks/useHoldSound';
 import confetti from 'canvas-confetti';
 
@@ -11,6 +12,12 @@ interface HoldButtonProps {
 
 export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className, isAfterParty }) => {
     const [isExploding, setIsExploding] = useState(false);
+    const [showOverlay, setShowOverlay] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Sound Hook
     const { playSuccess, stop } = useHoldSound();
@@ -18,7 +25,6 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className, i
     // We use a MotionValue to drive the gradient fill level (0 to 100)
     const fillLevel = useMotionValue(0);
     const scaleControls = useAnimation();
-    const overlayControls = useAnimation();
 
     const HOLD_DURATION = 1.5; // seconds
 
@@ -79,7 +85,7 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className, i
 
         const shootConfetti = (origin: { x: number, y: number }) => {
             confetti({
-                particleCount: 40,
+                particleCount: 25,
                 spread: 100,
                 origin: origin,
                 colors: colors,
@@ -103,16 +109,20 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className, i
         scaleControls.start({ scale: 0, opacity: 0, transition: { duration: 0.1 } });
 
         // Expand overlay
-        await overlayControls.start({
-            scale: 60,
-            opacity: 1,
-            transition: { duration: 0.8, ease: "easeIn" }
-        });
+        setShowOverlay(true);
+        await new Promise(r => setTimeout(r, 800)); // Wait for expansion
 
         onComplete();
 
-        // Fade out overlay
-        await overlayControls.start({ opacity: 0, transition: { duration: 0.5, delay: 0.5 } });
+        // Delay before fading out
+        await new Promise(r => setTimeout(r, 500));
+
+        // Start fade out (Exit animation)
+        setShowOverlay(false);
+
+        // Wait for exit animation to finish
+        await new Promise(r => setTimeout(r, 500));
+
         setIsExploding(false);
 
         // Reset
@@ -139,11 +149,18 @@ export const HoldButton: React.FC<HoldButtonProps> = ({ onComplete, className, i
 
     return (
         <>
-            <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={overlayControls}
-                className={`fixed z-[9999] pointer-events-none w-20 h-20 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center ${isAfterParty ? 'bg-purple-600' : 'bg-rose-400'}`}
-            />
+            <AnimatePresence>
+                {showOverlay && mounted && createPortal(
+                    <motion.div
+                        initial={{ clipPath: "circle(0% at 50% 50%)", opacity: 1 }}
+                        animate={{ clipPath: "circle(150% at 50% 50%)" }}
+                        exit={{ opacity: 0, transition: { duration: 0.5 } }}
+                        transition={{ duration: 0.8, ease: "easeIn" }}
+                        className={`fixed z-[9999] pointer-events-none inset-0 w-full h-full ${isAfterParty ? 'bg-purple-600' : 'bg-rose-400'}`}
+                    />,
+                    document.body
+                )}
+            </AnimatePresence>
 
             <div className={`flex flex-col items-center gap-4 ${className}`}>
                 <motion.button

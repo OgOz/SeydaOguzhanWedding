@@ -146,7 +146,7 @@ const commonTR = {
         successMessage: "İyi ki varsın. Bu hediye, yuvamızın küçük bir parçası olacak.",
         eyebrow: "HEDİYE",
         catchPhrase: {
-            default: "Ufak bir katkı?",
+            default: "Ufak bir sevgi hediyesi?",
             caught: "Desteğiniz için teşekkürler."
         },
         messages: [
@@ -157,7 +157,7 @@ const commonTR = {
             "Hediye konusunu dert etmeyin, keyfimize bakalım 🎉",
             "Bakın, söz veriyoruz: kırılmayız 😄",
             "Nazik düşünceniz bize fazlasıyla değerli 🙏",
-            "Pero biz bu günü sade tutmak istiyoruz 🌿",
+            "Biz bu günü sade tutmak istiyoruz 🌿",
             "İnatçı olduğunuzu biliyoruz… yine de yok diyoruz 😄",
             "Gerçekten: varlığınız bizim için en güzeli 🤍",
             "Şimdi eğlenmeye dönelim, gerisini boş verelim 🎶",
@@ -274,7 +274,7 @@ export const partyTR: Content = {
     ...commonTR,
     gift: {
         ...commonTR.gift,
-        eyebrow: "DESTEK",
+        eyebrow: "HEDİYE",
     },
     guestbook: {
         ...commonTR.guestbook,
